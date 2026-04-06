@@ -1,0 +1,4 @@
+AI in healthcare may also help expand access to care through virtual assistants,
+remote monitoring, and faster review of medical images. At the same time, experts
+warn that healthcare organizations need strong safeguards to protect sensitive data
+and ensure AI systems are used responsibly.

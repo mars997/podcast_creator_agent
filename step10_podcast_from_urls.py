@@ -1,0 +1,192 @@
+import os
+from pathlib import Path
+from urllib.parse import urlparse
+
+import requests
+from bs4 import BeautifulSoup
+from dotenv import load_dotenv
+from openai import OpenAI
+
+
+load_dotenv()
+
+api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
+    raise ValueError("OPENAI_API_KEY not found in .env file")
+
+client = OpenAI(api_key=api_key)
+
+
+def sanitize_filename(text: str) -> str:
+    cleaned = "".join(c if c.isalnum() or c in (" ", "-", "_") else "" for c in text).strip()
+    return cleaned.replace(" ", "_")
+
+
+def get_word_range(length_choice: str) -> str:
+    mapping = {
+        "short": "300 to 450 words",
+        "medium": "500 to 700 words",
+        "long": "800 to 1100 words",
+    }
+    return mapping.get(length_choice.lower(), "500 to 700 words")
+
+
+def fetch_article_text(url: str) -> str:
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                      "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+    }
+
+    response = requests.get(url, headers=headers, timeout=20)
+    response.raise_for_status()
+
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    for tag in soup(["script", "style", "noscript", "header", "footer", "nav", "aside"]):
+        tag.decompose()
+
+    title = soup.title.get_text(strip=True) if soup.title else "Untitled"
+
+    paragraphs = [p.get_text(" ", strip=True) for p in soup.find_all("p")]
+    paragraphs = [p for p in paragraphs if len(p) > 40]
+
+    article_text = "\n".join(paragraphs[:80]).strip()
+
+    if not article_text:
+        raise ValueError(f"Could not extract article text from: {url}")
+
+    return f"Title: {title}\nURL: {url}\n\n{article_text}"
+
+
+url_input = input("Enter article URLs separated by commas: ").strip()
+topic = input("Enter episode topic/title: ").strip()
+tone = input("Choose tone (casual/professional/educational): ").strip().lower()
+voice = input("Choose voice (alloy/echo/fable/onyx/nova/shimmer): ").strip().lower()
+length = input("Choose length (short/medium/long): ").strip().lower()
+
+if not url_input:
+    raise ValueError("You must provide at least one URL.")
+
+urls = [u.strip() for u in url_input.split(",") if u.strip()]
+if not urls:
+    raise ValueError("No valid URLs were provided.")
+
+if not topic:
+    raise ValueError("Topic cannot be empty.")
+
+if tone not in {"casual", "professional", "educational"}:
+    raise ValueError("Tone must be casual, professional, or educational.")
+
+if voice not in {"alloy", "echo", "fable", "onyx", "nova", "shimmer"}:
+    raise ValueError("Invalid voice selected.")
+
+if length not in {"short", "medium", "long"}:
+    raise ValueError("Length must be short, medium, or long.")
+
+word_range = get_word_range(length)
+
+safe_topic = sanitize_filename(topic)
+episode_dir = Path("output") / safe_topic
+episode_dir.mkdir(parents=True, exist_ok=True)
+
+sources_dir = episode_dir / "sources"
+sources_dir.mkdir(exist_ok=True)
+
+all_sources = []
+
+print("Fetching article content...")
+for idx, url in enumerate(urls, start=1):
+    try:
+        article_text = fetch_article_text(url)
+        all_sources.append(f"Source {idx}:\n{article_text}")
+
+        domain = urlparse(url).netloc.replace(".", "_")
+        source_file = sources_dir / f"source_{idx}_{domain}.txt"
+        source_file.write_text(article_text, encoding="utf-8")
+        print(f"Saved source {idx}: {source_file.resolve()}")
+
+    except Exception as e:
+        print(f"Failed to fetch {url}: {e}")
+
+if not all_sources:
+    raise ValueError("No article content could be retrieved from the provided URLs.")
+
+combined_source_text = "\n\n" + ("\n\n" + "=" * 60 + "\n\n").join(all_sources)
+
+script_prompt = f"""
+You are a podcast writer creating a solo-host podcast episode.
+
+Episode topic: {topic}
+Tone: {tone}
+Target length: {word_range}
+
+Use the source materials below to write the episode.
+Combine the ideas clearly and naturally.
+Stay grounded in the sources and do not invent specific facts not supported by them.
+
+Requirements:
+- A catchy episode title on the first line
+- A short welcome intro
+- 3 clear main talking points
+- A short conclusion
+- Sound natural when spoken aloud
+- No bullet points
+- Beginner-friendly
+- Smooth transitions between sections
+
+Source materials:
+{combined_source_text}
+"""
+
+print("Generating podcast script...")
+
+script_response = client.responses.create(
+    model="gpt-4.1-mini",
+    input=script_prompt
+)
+
+script = script_response.output_text.strip()
+
+script_file = episode_dir / "script.txt"
+script_file.write_text(script, encoding="utf-8")
+print(f"Script saved to: {script_file.resolve()}")
+
+show_notes_prompt = f"""
+Based on the following podcast script, create show notes.
+
+Requirements:
+- Include the episode title
+- Include a short summary
+- Include 3 key takeaways
+- Clean and readable format
+
+Podcast script:
+{script}
+"""
+
+print("Generating show notes...")
+
+notes_response = client.responses.create(
+    model="gpt-4.1-mini",
+    input=show_notes_prompt
+)
+
+show_notes = notes_response.output_text.strip()
+
+show_notes_file = episode_dir / "show_notes.txt"
+show_notes_file.write_text(show_notes, encoding="utf-8")
+print(f"Show notes saved to: {show_notes_file.resolve()}")
+
+audio_file = episode_dir / f"podcast_{voice}.mp3"
+
+print("Generating audio...")
+
+with client.audio.speech.with_streaming_response.create(
+    model="gpt-4o-mini-tts",
+    voice=voice,
+    input=script,
+) as response:
+    response.stream_to_file(audio_file)
+
+print(f"Audio saved to: {audio_file.resolve()}")
+print("Step 10 complete.")

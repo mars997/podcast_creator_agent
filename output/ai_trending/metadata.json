@@ -1,0 +1,33 @@
+{
+  "created_at": "2026-04-06T13:38:47.339305",
+  "topic": "ai_trending",
+  "tone": "educational",
+  "voice": "nova",
+  "length": "medium",
+  "word_range_target": "500 to 700 words",
+  "models": {
+    "script_model": "gpt-4.1-mini",
+    "tts_model": "gpt-4o-mini-tts"
+  },
+  "inputs": {
+    "requested_urls": [
+      "https://en.wikipedia.org/wiki/Artificial_intelligence"
+    ],
+    "requested_files": [],
+    "successful_urls": [
+      {
+        "url": "https://en.wikipedia.org/wiki/Artificial_intelligence",
+        "saved_source_file": "output\\ai_trending\\sources\\source_1_en_wikipedia_org.txt"
+      }
+    ],
+    "failed_urls": [],
+    "successful_files": [],
+    "failed_files": []
+  },
+  "outputs": {
+    "episode_dir": "output\\ai_trending",
+    "script_file": "output\\ai_trending\\script.txt",
+    "show_notes_file": "output\\ai_trending\\show_notes.txt",
+    "audio_file": "output\\ai_trending\\podcast_nova.mp3"
+  }
+}
