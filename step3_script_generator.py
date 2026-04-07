@@ -1,14 +1,16 @@
 import os
 from dotenv import load_dotenv
-from openai import OpenAI
+
+# Import provider abstraction (Step 21+)
+from providers import get_default_config, create_llm_provider
 
 load_dotenv()
 
-api_key = os.getenv("OPENAI_API_KEY")
-if not api_key:
-    raise ValueError("OPENAI_API_KEY not found in .env file")
+# Get provider configuration and create LLM provider
+provider_config = get_default_config()
+llm_provider = create_llm_provider(provider_config)
 
-client = OpenAI(api_key=api_key)
+print(f"Using LLM provider: {llm_provider.provider_name.upper()} ({llm_provider.model_name})")
 
 topic = input("Enter a podcast topic: ").strip()
 
@@ -33,12 +35,8 @@ Requirements:
 - Format it like a script for a solo podcast host
 """
 
-response = client.responses.create(
-    model="gpt-4.1-mini",
-    input=prompt
-)
-
-script = response.output_text
+# Use LLM provider instead of direct OpenAI client
+script = llm_provider.generate_text(prompt)
 
 print("\n" + "=" * 60)
 print("PODCAST SCRIPT")

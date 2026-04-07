@@ -4,32 +4,39 @@ from datetime import datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
-from openai import OpenAI
+
+# Import provider abstraction (Step 21+)
+from providers import get_default_config, create_llm_provider, create_tts_provider
+import config
 
 
 # =========================
-# CONFIG
+# LOAD CONFIGURATION
 # =========================
-DEFAULT_TONE = "educational"
-DEFAULT_VOICE = "nova"
-DEFAULT_LENGTH = "medium"
-OUTPUT_ROOT = "output"
-
-SCRIPT_MODEL = "gpt-4.1-mini"
-TTS_MODEL = "gpt-4o-mini-tts"
-
-VALID_TONES = {"casual", "professional", "educational"}
-VALID_VOICES = {"alloy", "echo", "fable", "onyx", "nova", "shimmer"}
-VALID_LENGTHS = {"short", "medium", "long"}
-
-
 load_dotenv()
 
-api_key = os.getenv("OPENAI_API_KEY")
-if not api_key:
-    raise ValueError("OPENAI_API_KEY not found in .env file")
+# Get provider configuration (auto-detects available providers)
+provider_config = get_default_config()
 
-client = OpenAI(api_key=api_key)
+# Create LLM and TTS providers
+llm_provider = create_llm_provider(provider_config)
+tts_provider = create_tts_provider(provider_config)
+
+# Display active providers
+print(f"\n[Provider Info]")
+print(f"  LLM: {llm_provider.provider_name.upper()} ({llm_provider.model_name})")
+print(f"  TTS: {tts_provider.provider_name.upper()} ({tts_provider.model_name})")
+print()
+
+# Use config module for settings
+DEFAULT_TONE = config.DEFAULT_TONE
+DEFAULT_VOICE = config.PROVIDER_MODELS.get(tts_provider.provider_name, {}).get("default_voice", "nova")
+DEFAULT_LENGTH = config.DEFAULT_LENGTH
+OUTPUT_ROOT = config.OUTPUT_ROOT
+
+VALID_TONES = config.VALID_TONES
+VALID_VOICES = set(tts_provider.available_voices)
+VALID_LENGTHS = config.VALID_LENGTHS
 
 
 def sanitize_filename(text: str) -> str:
@@ -40,12 +47,7 @@ def sanitize_filename(text: str) -> str:
 
 def get_word_range(length_choice: str) -> str:
     """Get word range based on length choice"""
-    mapping = {
-        "short": "300 to 450 words",
-        "medium": "500 to 700 words",
-        "long": "800 to 1100 words",
-    }
-    return mapping.get(length_choice.lower(), "500 to 700 words")
+    return config.get_word_range(length_choice)
 
 
 def get_user_input(prompt_text: str, default_value: str) -> str:
@@ -94,7 +96,7 @@ def read_text_from_file(file_path: Path) -> str:
 
 
 def build_script(topic: str, tone: str, word_range: str, source_material: str) -> str:
-    """Generate podcast script using LLM"""
+    """Generate podcast script using LLM provider"""
     prompt = f"""
 You are a podcast writer creating a solo-host podcast episode.
 
@@ -120,15 +122,11 @@ Source materials:
 {source_material}
 """
 
-    response = client.responses.create(
-        model=SCRIPT_MODEL,
-        input=prompt
-    )
-    return response.output_text.strip()
+    return llm_provider.generate_text(prompt)
 
 
 def build_show_notes(script: str) -> str:
-    """Generate show notes from script"""
+    """Generate show notes from script using LLM provider"""
     prompt = f"""
 Based on the following podcast script, create show notes.
 
@@ -142,21 +140,12 @@ Podcast script:
 {script}
 """
 
-    response = client.responses.create(
-        model=SCRIPT_MODEL,
-        input=prompt
-    )
-    return response.output_text.strip()
+    return llm_provider.generate_text(prompt)
 
 
 def generate_audio(script: str, voice: str, audio_path: Path) -> None:
-    """Generate audio file from script using TTS"""
-    with client.audio.speech.with_streaming_response.create(
-        model=TTS_MODEL,
-        voice=voice,
-        input=script,
-    ) as response:
-        response.stream_to_file(audio_path)
+    """Generate audio file from script using TTS provider"""
+    tts_provider.generate_audio(script, voice, audio_path)
 
 
 def save_json(data: dict | list, file_path: Path) -> None:
@@ -302,9 +291,15 @@ def main():
             "word_count": len(content.split()),
             "input_method": "paste" if choice == "1" else "file"
         },
+        "providers": {
+            "llm_provider": llm_provider.provider_name,
+            "llm_model": llm_provider.model_name,
+            "tts_provider": tts_provider.provider_name,
+            "tts_model": tts_provider.model_name
+        },
         "models": {
-            "script_model": SCRIPT_MODEL,
-            "tts_model": TTS_MODEL
+            "script_model": llm_provider.model_name,
+            "tts_model": tts_provider.model_name
         },
         "outputs": {
             "episode_dir": str(episode_dir),

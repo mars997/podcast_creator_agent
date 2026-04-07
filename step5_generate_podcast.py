@@ -1,15 +1,19 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-from openai import OpenAI
+
+# Import provider abstraction (Step 21+)
+from providers import get_default_config, create_llm_provider, create_tts_provider
 
 load_dotenv()
 
-api_key = os.getenv("OPENAI_API_KEY")
-if not api_key:
-    raise ValueError("OPENAI_API_KEY not found in .env file")
+# Get provider configuration
+provider_config = get_default_config()
+llm_provider = create_llm_provider(provider_config)
+tts_provider = create_tts_provider(provider_config)
 
-client = OpenAI(api_key=api_key)
+print(f"LLM: {llm_provider.provider_name.upper()} ({llm_provider.model_name})")
+print(f"TTS: {tts_provider.provider_name.upper()} ({tts_provider.model_name})")
 
 topic = input("Enter a podcast topic: ").strip()
 
@@ -36,12 +40,8 @@ Requirements:
 
 print("Generating script...")
 
-response = client.responses.create(
-    model="gpt-4.1-mini",
-    input=prompt
-)
-
-script = response.output_text
+# Use LLM provider
+script = llm_provider.generate_text(prompt)
 
 output_dir = Path("output")
 output_dir.mkdir(exist_ok=True)
@@ -58,12 +58,8 @@ with open(script_file, "w", encoding="utf-8") as f:
 print(f"Script saved to: {script_file.resolve()}")
 print("Generating audio...")
 
-with client.audio.speech.with_streaming_response.create(
-    model="gpt-4o-mini-tts",
-    voice="alloy",
-    input=script,
-) as response:
-    response.stream_to_file(audio_file)
+# Use TTS provider
+tts_provider.generate_audio(script, "alloy", audio_file)
 
 print(f"Audio saved to: {audio_file.resolve()}")
 print("Podcast generation complete.")

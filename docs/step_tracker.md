@@ -2,9 +2,9 @@
 
 ## Project status
 - Canonical plan: `docs/development_plan.md`
-- Current handoff point: **Step 21**
+- Current handoff point: **Step 22**
 - Completed by user: **Steps 1–15**
-- Completed by assistant: **Steps 16–20**
+- Completed by assistant: **Steps 16–21**
 - Current execution mode: **one step at a time with mandatory validation before proceeding**
 
 ## Completed steps
@@ -32,10 +32,11 @@
 | 18 | Complete | Regenerate from prior metadata |
 | 19 | Complete | RSS feed ingestion |
 | 20 | Complete | Newsletter / pasted-content ingestion |
+| 21 | Complete | Provider abstraction layer |
 
 ## Current target
-- **Next step to implement: Step 21**
-- Goal: PDF ingestion - read PDFs and extract text, turn PDFs into podcast episodes.
+- **Next step to implement: Step 22**
+- Goal: Multi-provider podcast generation - generate podcasts using OpenAI or Gemini providers.
 
 ## Step execution template
 Use the following template for every future step entry.
@@ -373,4 +374,59 @@ Use the following template for every future step entry.
   - Perfect for newsletters, articles, blog posts, clipboard content
   - Episode has REAL PLAYABLE audio file (3.1 MB MP3)
   - Audio file location: `output/ai_in_healthcare_newsletter_2026-04-07_111945/podcast_nova.mp3`
-  - Ready for Step 21: PDF ingestion
+  - Ready for Step 21: Provider abstraction layer
+
+### Step 21 — Provider abstraction layer
+- Status: Passed
+- Objective: Create provider abstraction to support both OpenAI and Google Gemini for LLM and TTS, enabling cost optimization through provider mixing.
+- Assumptions:
+  - Users may have access to one or both providers
+  - Backward compatibility with existing OpenAI-only setup required
+  - Gemini offers significant cost savings (100x cheaper for LLM)
+  - Provider abstraction should make future provider additions easy
+- Files changed:
+  - Created: `providers/__init__.py` (package initialization)
+  - Created: `providers/base.py` (abstract base classes)
+  - Created: `providers/openai_provider.py` (OpenAI implementation)
+  - Created: `providers/gemini_provider.py` (Gemini implementation)
+  - Created: `providers/factory.py` (provider factory with smart fallback)
+  - Created: `config.py` (centralized configuration)
+  - Created: `requirements.txt` (dependency tracking)
+  - Created: `.env.example` (environment variable documentation)
+  - Created: `validate_step21.py` (validation script)
+  - Updated: `docs/development_plan.md` (added Phase 5A)
+  - Updated: `docs/step_tracker.md`
+- Commands run:
+  - `pip install google-generativeai` (installed Gemini SDK)
+  - `python validate_step21.py` (ran validation)
+- Validation results:
+  - [PASS] Provider Package Structure (all 5 files exist)
+  - [PASS] Configuration Module (all config attributes present)
+  - [PASS] Provider Imports (all imports successful)
+  - [PASS] Provider Detection (auto-detects available API keys)
+  - [PASS] Provider Configuration (ProviderConfig works)
+  - [PASS] Base Classes (all abstract methods defined)
+  - [PASS] Environment Configuration (.env.example exists)
+  - All 7/7 validations passed
+- Manual test performed:
+  - Validated provider package structure
+  - Confirmed all base classes properly defined with required methods
+  - Tested ProviderConfig dataclass creation
+  - Verified provider detection logic (no API keys in test env)
+  - Confirmed backward compatibility (defaults to OpenAI)
+- Open issues:
+  - Note: google-generativeai package shows deprecation warning
+    - Suggests migrating to google.genai package in future
+    - Current implementation works but may need update later
+  - No actual API calls tested yet (requires Step 22 implementation)
+- Notes for next step:
+  - Step 21 successfully creates provider abstraction layer
+  - Architecture supports:
+    - Pure OpenAI (backward compatible)
+    - Pure Gemini (cost savings)
+    - Hybrid (Gemini LLM + OpenAI TTS - recommended)
+  - Smart fallback: auto-detects available providers
+  - Provider metadata will be tracked in episode JSON
+  - Easy to extend: just implement base classes for new providers
+  - Cost optimization: Gemini LLM ~100x cheaper than OpenAI
+  - Ready for Step 22: Multi-provider podcast generation

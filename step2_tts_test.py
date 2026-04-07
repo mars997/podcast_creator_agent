@@ -1,15 +1,27 @@
+"""
+DEPRECATED: This script is kept for backward compatibility and manual testing.
+
+For automated testing of TTS functionality, use:
+- Unit tests (fast, mocked): pytest tests/unit/test_tts_provider.py
+- Integration tests (real API): pytest tests/integration/test_tts_integration.py -m integration
+
+This script remains useful for quick manual validation but is not part of the test suite.
+"""
+
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-from openai import OpenAI
+
+# Import provider abstraction (Step 21+)
+from providers import get_default_config, create_tts_provider
 
 load_dotenv()
 
-api_key = os.getenv("OPENAI_API_KEY")
-if not api_key:
-    raise ValueError("OPENAI_API_KEY not found in .env file")
+# Get provider configuration and create TTS provider
+provider_config = get_default_config()
+tts_provider = create_tts_provider(provider_config)
 
-client = OpenAI(api_key=api_key)
+print(f"Using TTS provider: {tts_provider.provider_name.upper()} ({tts_provider.model_name})")
 
 output_dir = Path("output")
 output_dir.mkdir(exist_ok=True)
@@ -22,11 +34,7 @@ This is a short test episode created with Python in Visual Studio Code.
 If you can hear this audio clearly, then step two is working successfully.
 """
 
-with client.audio.speech.with_streaming_response.create(
-    model="gpt-4o-mini-tts",
-    voice="alloy",
-    input=script_text,
-) as response:
-    response.stream_to_file(output_file)
+# Use TTS provider instead of direct OpenAI client
+tts_provider.generate_audio(script_text, "alloy", output_file)
 
 print(f"Audio saved to: {output_file.resolve()}")

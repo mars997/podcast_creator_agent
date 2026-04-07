@@ -4,7 +4,9 @@ from datetime import datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
-from openai import OpenAI
+# Import provider abstraction (Step 21+)
+from providers import get_default_config, create_llm_provider, create_tts_provider
+import config
 
 
 # =========================
@@ -20,11 +22,18 @@ DEFAULT_TTS_MODEL = "gpt-4o-mini-tts"
 
 load_dotenv()
 
-api_key = os.getenv("OPENAI_API_KEY")
-if not api_key:
-    raise ValueError("OPENAI_API_KEY not found in .env file")
+# Get provider configuration (auto-detects available providers)
+provider_config = get_default_config()
 
-client = OpenAI(api_key=api_key)
+# Create LLM and TTS providers
+llm_provider = create_llm_provider(provider_config)
+tts_provider = create_tts_provider(provider_config)
+
+# Display active providers
+print(f"\n[Provider Info]")
+print(f"  LLM: {llm_provider.provider_name.upper()} ({llm_provider.model_name})")
+print(f"  TTS: {tts_provider.provider_name.upper()} ({tts_provider.model_name})")
+print()
 
 
 def sanitize_filename(text: str) -> str:
@@ -122,11 +131,7 @@ Source materials:
 {source_material}
 """
 
-    response = client.responses.create(
-        model=model,
-        input=prompt
-    )
-    return response.output_text.strip()
+    return llm_provider.generate_text(prompt)
 
 
 def build_show_notes(script: str, model: str) -> str:
@@ -144,21 +149,12 @@ Podcast script:
 {script}
 """
 
-    response = client.responses.create(
-        model=model,
-        input=prompt
-    )
-    return response.output_text.strip()
+    return llm_provider.generate_text(prompt)
 
 
 def generate_audio(script: str, voice: str, audio_path: Path, model: str) -> None:
     """Generate audio file from script using TTS"""
-    with client.audio.speech.with_streaming_response.create(
-        model=model,
-        voice=voice,
-        input=script,
-    ) as response:
-        response.stream_to_file(audio_path)
+    tts_provider.generate_audio(script, voice, audio_path)
 
 
 def save_json(data: dict | list, file_path: Path) -> None:

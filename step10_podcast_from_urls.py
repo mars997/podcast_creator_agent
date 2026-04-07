@@ -5,16 +5,25 @@ from urllib.parse import urlparse
 import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
-from openai import OpenAI
+# Import provider abstraction (Step 21+)
+from providers import get_default_config, create_llm_provider, create_tts_provider
+import config
 
 
 load_dotenv()
 
-api_key = os.getenv("OPENAI_API_KEY")
-if not api_key:
-    raise ValueError("OPENAI_API_KEY not found in .env file")
+# Get provider configuration (auto-detects available providers)
+provider_config = get_default_config()
 
-client = OpenAI(api_key=api_key)
+# Create LLM and TTS providers
+llm_provider = create_llm_provider(provider_config)
+tts_provider = create_tts_provider(provider_config)
+
+# Display active providers
+print(f"\n[Provider Info]")
+print(f"  LLM: {llm_provider.provider_name.upper()} ({llm_provider.model_name})")
+print(f"  TTS: {tts_provider.provider_name.upper()} ({tts_provider.model_name})")
+print()
 
 
 def sanitize_filename(text: str) -> str:
@@ -23,12 +32,7 @@ def sanitize_filename(text: str) -> str:
 
 
 def get_word_range(length_choice: str) -> str:
-    mapping = {
-        "short": "300 to 450 words",
-        "medium": "500 to 700 words",
-        "long": "800 to 1100 words",
-    }
-    return mapping.get(length_choice.lower(), "500 to 700 words")
+    return config.get_word_range(length_choice)
 
 
 def fetch_article_text(url: str) -> str:
@@ -140,12 +144,7 @@ Source materials:
 
 print("Generating podcast script...")
 
-script_response = client.responses.create(
-    model="gpt-4.1-mini",
-    input=script_prompt
-)
-
-script = script_response.output_text.strip()
+script = llm_provider.generate_text(script_prompt)
 
 script_file = episode_dir / "script.txt"
 script_file.write_text(script, encoding="utf-8")
@@ -166,12 +165,7 @@ Podcast script:
 
 print("Generating show notes...")
 
-notes_response = client.responses.create(
-    model="gpt-4.1-mini",
-    input=show_notes_prompt
-)
-
-show_notes = notes_response.output_text.strip()
+show_notes = llm_provider.generate_text(show_notes_prompt)
 
 show_notes_file = episode_dir / "show_notes.txt"
 show_notes_file.write_text(show_notes, encoding="utf-8")
@@ -181,12 +175,7 @@ audio_file = episode_dir / f"podcast_{voice}.mp3"
 
 print("Generating audio...")
 
-with client.audio.speech.with_streaming_response.create(
-    model="gpt-4o-mini-tts",
-    voice=voice,
-    input=script,
-) as response:
-    response.stream_to_file(audio_file)
+tts_provider.generate_audio(script, voice, audio_file)
 
 print(f"Audio saved to: {audio_file.resolve()}")
 print("Step 10 complete.")

@@ -22,7 +22,12 @@
       "Bash(find output:*)",
       "Bash(.venv/Scripts/pip list:*)",
       "Bash(.venv/Scripts/pip install:*)",
-      "Bash(.venv/Scripts/python.exe demo_step19_rss.py)"
+      "Bash(.venv/Scripts/python.exe demo_step19_rss.py)",
+      "Bash(ls -la *.py)",
+      "Bash(ls -la /c/Users/WTHickman/repos/podcast_creator_agent/*.md /c/Users/WTHickman/repos/podcast_creator_agent/docs/)",
+      "Bash(pip freeze:*)",
+      "Bash(pip list:*)",
+      "Bash(ls -la *.txt)"
     ]
   }
 }

@@ -8,14 +8,16 @@ import feedparser
 import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
-from openai import OpenAI
+# Import provider abstraction (Step 21+)
+from providers import get_default_config, create_llm_provider, create_tts_provider
+import config
 
 
 # =========================
 # CONFIG
 # =========================
 DEFAULT_TONE = "educational"
-DEFAULT_VOICE = "nova"
+DEFAULT_VOICE = config.PROVIDER_MODELS.get(tts_provider.provider_name, {}).get("default_voice", "nova")
 DEFAULT_LENGTH = "medium"
 DEFAULT_NUM_ARTICLES = 3
 OUTPUT_ROOT = "output"
@@ -24,17 +26,24 @@ SCRIPT_MODEL = "gpt-4.1-mini"
 TTS_MODEL = "gpt-4o-mini-tts"
 
 VALID_TONES = {"casual", "professional", "educational"}
-VALID_VOICES = {"alloy", "echo", "fable", "onyx", "nova", "shimmer"}
+VALID_VOICES = set(tts_provider.available_voices)
 VALID_LENGTHS = {"short", "medium", "long"}
 
 
 load_dotenv()
 
-api_key = os.getenv("OPENAI_API_KEY")
-if not api_key:
-    raise ValueError("OPENAI_API_KEY not found in .env file")
+# Get provider configuration (auto-detects available providers)
+provider_config = get_default_config()
 
-client = OpenAI(api_key=api_key)
+# Create LLM and TTS providers
+llm_provider = create_llm_provider(provider_config)
+tts_provider = create_tts_provider(provider_config)
+
+# Display active providers
+print(f"\n[Provider Info]")
+print(f"  LLM: {llm_provider.provider_name.upper()} ({llm_provider.model_name})")
+print(f"  TTS: {tts_provider.provider_name.upper()} ({tts_provider.model_name})")
+print()
 
 
 def sanitize_filename(text: str) -> str:
@@ -157,11 +166,7 @@ Source materials:
 {source_material}
 """
 
-    response = client.responses.create(
-        model=SCRIPT_MODEL,
-        input=prompt
-    )
-    return response.output_text.strip()
+    return llm_provider.generate_text(prompt)
 
 
 def build_show_notes(script: str) -> str:
@@ -179,21 +184,12 @@ Podcast script:
 {script}
 """
 
-    response = client.responses.create(
-        model=SCRIPT_MODEL,
-        input=prompt
-    )
-    return response.output_text.strip()
+    return llm_provider.generate_text(prompt)
 
 
 def generate_audio(script: str, voice: str, audio_path: Path) -> None:
     """Generate audio file from script using TTS"""
-    with client.audio.speech.with_streaming_response.create(
-        model=TTS_MODEL,
-        voice=voice,
-        input=script,
-    ) as response:
-        response.stream_to_file(audio_path)
+    tts_provider.generate_audio(script, voice, audio_path)
 
 
 def save_json(data: dict | list, file_path: Path) -> None:
@@ -388,9 +384,15 @@ def main():
             "articles": successful_articles,
             "failed_articles": failed_articles
         },
+        "providers": {
+            "llm_provider": llm_provider.provider_name,
+            "llm_model": llm_provider.model_name,
+            "tts_provider": tts_provider.provider_name,
+            "tts_model": tts_provider.model_name
+        },
         "models": {
-            "script_model": SCRIPT_MODEL,
-            "tts_model": TTS_MODEL
+            "script_model": llm_provider.model_name,
+            "tts_model": tts_provider.model_name
         },
         "outputs": {
             "episode_dir": str(episode_dir),

@@ -143,6 +143,30 @@ This document is the canonical step-by-step implementation plan for the `podcast
 
 ---
 
+## Phase 5A — Multi-Provider Support
+
+### Step 21. Provider abstraction layer
+- Create provider abstraction for LLM and TTS
+- Support both OpenAI and Google Gemini
+- Allow mixing providers (e.g., Gemini LLM + OpenAI TTS)
+- Smart fallback if preferred provider unavailable
+- Backward compatible with existing episodes
+
+### Step 22. Multi-provider podcast generation
+- Generate podcasts using either OpenAI or Gemini
+- Support hybrid configurations
+- Track provider info in metadata
+- Cost optimization options
+
+### Step 23. Provider documentation
+- Setup guide for OpenAI
+- Setup guide for Gemini
+- Environment variable reference
+- Cost comparison
+- Troubleshooting
+
+---
+
 ## Phase 6 — Better script quality
 
 ### Step 24. Stronger podcast templates
