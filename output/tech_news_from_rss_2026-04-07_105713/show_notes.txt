@@ -1,0 +1,28 @@
+Show Notes - Tech News from RSS Feed
+
+Summary:
+This episode covers the latest technology news from NYT > Technology.
+
+Articles covered:
+
+1. Big Banks Seeking a Piece of SpaceX’s I.P.O. Must Subscribe to Elon Musk’s Grok
+   https://www.nytimes.com/2026/04/03/business/spacex-ipo-grok-elon-musk.html
+   Published: Fri, 03 Apr 2026 18:23:06 +0000
+
+2. OpenAI Buys Streaming Show ‘TBPN,’ Aiming to Change Narrative on A.I.
+   https://www.nytimes.com/2026/04/02/technology/openai-buys-tbpn.html
+   Published: Fri, 03 Apr 2026 17:53:29 +0000
+
+3. How A.I. Helped One Man (and His Brother) Build a $1.8 Billion Company
+   https://www.nytimes.com/2026/04/02/technology/ai-billion-dollar-company-medvi.html
+   Published: Thu, 02 Apr 2026 09:02:30 +0000
+
+Key Takeaways:
+1. RSS feeds provide automatic content discovery
+2. Multiple articles can be combined into one episode
+3. Source attribution is preserved in metadata
+
+RSS Feed: https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml
+Generated: 2026-04-07T10:57:13.241364
+
+[Demo show notes - Step 19]

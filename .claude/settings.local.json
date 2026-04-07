@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -ld \"c:\\\\Users\\\\ge000m\\\\OneDrive - NRG Energy, Inc\\\\Alex\\\\Hackthon\\\\04 2026\\\\podcast_creator_agent\\\\output\"/test_episode_*)",
+      "Bash(ls -la \"c:\\\\Users\\\\ge000m\\\\OneDrive - NRG Energy, Inc\\\\Alex\\\\Hackthon\\\\04 2026\\\\podcast_creator_agent\\\\output\"/test_episode_*/sources/)",
+      "Bash(.venv/Scripts/python.exe validate_step16.py)",
+      "Bash(rm -rf output/test_episode_*)",
+      "Bash(rm test_source.txt)",
+      "Bash(ls -1 step*.py)",
+      "Bash(bash run_step16_demo.sh)",
+      "Bash(ls -ld output/step16_demo_*)",
+      "Bash(tree output/step16_demo_*)",
+      "Bash(find output/step16_demo_* -type f -o -type d)",
+      "Bash(ls -d output/*/)",
+      "Bash(.venv/Scripts/python.exe step17_episode_browser.py --list)",
+      "Bash(.venv/Scripts/python.exe validate_step17.py)",
+      "Bash(ls -la step17*.py validate_step17.py)",
+      "Bash(ls -la output/ai_trending_regenerated_*/)",
+      "Bash(.venv/Scripts/python.exe validate_step18.py)",
+      "Bash(.venv/Scripts/python.exe demo_step18_regeneration.py)",
+      "Bash(ls -1d output/ai_trending_regenerated_*)",
+      "Bash(find output:*)",
+      "Bash(.venv/Scripts/pip list:*)",
+      "Bash(.venv/Scripts/pip install:*)",
+      "Bash(.venv/Scripts/python.exe demo_step19_rss.py)"
+    ]
+  }
+}

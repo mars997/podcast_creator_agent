@@ -1,0 +1,9 @@
+Title: OpenAI Buys Streaming Show ‘TBPN,’ Aiming to Change Narrative on A.I.
+URL: https://www.nytimes.com/2026/04/02/technology/openai-buys-tbpn.html
+Published: Fri, 03 Apr 2026 17:53:29 +0000
+Author: Mike Isaac
+
+Description:
+OpenAI said the deal would help it “create a space for a real, constructive conversation about the changes A.I. creates.”
+
+[This is a demo - in real RSS podcast, the full article would be fetched from the URL]

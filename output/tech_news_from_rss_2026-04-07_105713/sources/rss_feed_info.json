@@ -1,0 +1,29 @@
+{
+  "feed_url": "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml",
+  "feed_title": "NYT > Technology",
+  "fetched_at": "2026-04-07T10:57:13.228675",
+  "num_articles": 3,
+  "articles": [
+    {
+      "title": "Big Banks Seeking a Piece of SpaceX’s I.P.O. Must Subscribe to Elon Musk’s Grok",
+      "link": "https://www.nytimes.com/2026/04/03/business/spacex-ipo-grok-elon-musk.html",
+      "description": "Mr. Musk is requiring Wall Street firms to purchase subscriptions to his A.I. chatbot if they want to advise on one of the largest initial public offerings in history.",
+      "published": "Fri, 03 Apr 2026 18:23:06 +0000",
+      "author": "Maureen Farrell"
+    },
+    {
+      "title": "OpenAI Buys Streaming Show ‘TBPN,’ Aiming to Change Narrative on A.I.",
+      "link": "https://www.nytimes.com/2026/04/02/technology/openai-buys-tbpn.html",
+      "description": "OpenAI said the deal would help it “create a space for a real, constructive conversation about the changes A.I. creates.”",
+      "published": "Fri, 03 Apr 2026 17:53:29 +0000",
+      "author": "Mike Isaac"
+    },
+    {
+      "title": "How A.I. Helped One Man (and His Brother) Build a $1.8 Billion Company",
+      "link": "https://www.nytimes.com/2026/04/02/technology/ai-billion-dollar-company-medvi.html",
+      "description": "Who needs more than two employees when artificial intelligence can do so many corporate tasks? It’s super efficient — and a little bit lonely.",
+      "published": "Thu, 02 Apr 2026 09:02:30 +0000",
+      "author": "Erin Griffith"
+    }
+  ]
+}

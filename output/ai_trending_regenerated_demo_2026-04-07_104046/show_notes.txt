@@ -1,0 +1,21 @@
+Show Notes - Regenerated Episode: ai_trending
+
+Summary:
+This is a demonstration of the Step 18 regeneration feature. It shows how
+episodes can be recreated from their original metadata and source files.
+
+Key Takeaways:
+1. Episodes can be regenerated using saved metadata
+2. Source files are preserved in the episode folder
+3. Regeneration creates a new episode with '_regenerated_' suffix
+4. Original episodes remain untouched
+
+Original Episode:
+- Created: 2026-04-06T15:11:35.948541
+- Episode ID: ai_trending
+
+Regenerated Episode:
+- Created: 2026-04-07T10:40:46.719671
+- Episode ID: ai_trending_regenerated_demo_2026-04-07_104046
+
+[Demo show notes - Step 18]

@@ -1,0 +1,25 @@
+Tech News Roundup from RSS Feed
+
+[This is a MOCK episode for demonstration purposes]
+
+Welcome to today's tech news roundup! I've gathered the latest stories from NYT > Technology
+to keep you updated on what's happening in technology.
+
+Today we're covering 3 key stories:
+- Big Banks Seeking a Piece of SpaceX’s I.P.O. Must Subscribe to Elon Musk’s Grok
+- OpenAI Buys Streaming Show ‘TBPN,’ Aiming to Change Narrative on A.I.
+- How A.I. Helped One Man (and His Brother) Build a $1.8 Billion Company
+
+Story 1: Big Banks Seeking a Piece of SpaceX’s I.P.O. Must Subscribe to Elon Musk’s Grok
+Mr. Musk is requiring Wall Street firms to purchase subscriptions to his A.I. chatbot if they want to advise on one of the largest initial public offerings in history....
+
+In a real RSS-generated podcast:
+- The full article would be fetched from each URL
+- The LLM would analyze all 3 articles
+- A cohesive script would be generated combining all sources
+- Audio would be generated with natural transitions
+
+This demonstrates how RSS feeds can automatically provide fresh content
+for podcast episodes without manual article selection.
+
+[End of mock script]

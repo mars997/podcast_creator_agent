@@ -1,0 +1,5 @@
+Artificial intelligence is increasingly being used in healthcare to assist doctors,
+improve diagnosis, automate paperwork, and personalize treatment plans. Hospitals
+are using AI tools to detect disease earlier, reduce administrative burden, and
+improve patient outcomes. However, challenges remain around privacy, bias, and
+regulatory oversight.

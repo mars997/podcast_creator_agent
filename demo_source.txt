@@ -1,0 +1,7 @@
+Demo Article: Step 16 Validation
+
+This is a demonstration source file to show how Step 16 creates unique timestamped episode folders.
+
+The key improvement in Step 16 is that running the same topic multiple times will create separate folders instead of overwriting previous episodes.
+
+Each episode gets a unique identifier based on the current timestamp, ensuring no data loss.

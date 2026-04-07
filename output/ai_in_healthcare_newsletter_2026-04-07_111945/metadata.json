@@ -1,0 +1,24 @@
+{
+  "created_at": "2026-04-07T11:19:45.910815",
+  "episode_id": "ai_in_healthcare_newsletter_2026-04-07_111945",
+  "topic": "ai_in_healthcare_newsletter",
+  "tone": "educational",
+  "voice": "nova",
+  "length": "medium",
+  "source_type": "pasted_content",
+  "content_info": {
+    "source": "pasted_text",
+    "character_count": 1447,
+    "word_count": 207,
+    "input_method": "paste"
+  },
+  "outputs": {
+    "episode_dir": "output\\ai_in_healthcare_newsletter_2026-04-07_111945",
+    "script_file": "output\\ai_in_healthcare_newsletter_2026-04-07_111945\\script.txt",
+    "show_notes_file": "output\\ai_in_healthcare_newsletter_2026-04-07_111945\\show_notes.txt",
+    "audio_file": "output\\ai_in_healthcare_newsletter_2026-04-07_111945\\podcast_nova.mp3",
+    "source_file": "output\\ai_in_healthcare_newsletter_2026-04-07_111945\\sources\\pasted_content.txt"
+  },
+  "demo_mode": true,
+  "note": "Demo episode - audio copied from existing real file"
+}

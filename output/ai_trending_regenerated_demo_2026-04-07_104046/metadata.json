@@ -1,0 +1,41 @@
+{
+  "created_at": "2026-04-07T10:40:46.726671",
+  "episode_id": "ai_trending_regenerated_demo_2026-04-07_104046",
+  "topic": "ai_trending",
+  "tone": "educational",
+  "voice": "nova",
+  "length": "medium",
+  "word_range_target": "500 to 700 words",
+  "regenerated_from": {
+    "original_episode_id": "ai_trending",
+    "original_created_at": "2026-04-06T15:11:35.948541",
+    "original_episode_dir": "output\\ai_trending"
+  },
+  "models": {
+    "script_model": "gpt-4.1-mini",
+    "tts_model": "gpt-4o-mini-tts"
+  },
+  "inputs": {
+    "requested_urls": [],
+    "requested_files": [
+      "source.txt"
+    ],
+    "successful_urls": [],
+    "failed_urls": [],
+    "successful_files": [
+      {
+        "original_file": "source.txt",
+        "saved_source_file": "output\\ai_trending\\sources\\source_1_source.txt"
+      }
+    ],
+    "failed_files": []
+  },
+  "outputs": {
+    "episode_dir": "output\\ai_trending_regenerated_demo_2026-04-07_104046",
+    "script_file": "output\\ai_trending_regenerated_demo_2026-04-07_104046\\script.txt",
+    "show_notes_file": "output\\ai_trending_regenerated_demo_2026-04-07_104046\\show_notes.txt",
+    "audio_file": "output\\ai_trending_regenerated_demo_2026-04-07_104046\\podcast_nova.mp3"
+  },
+  "demo_mode": true,
+  "note": "This is a demonstration episode created without API calls"
+}

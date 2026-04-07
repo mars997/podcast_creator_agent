@@ -1,5 +1,5 @@
 {
-  "created_at": "2026-04-06T13:38:47.339305",
+  "created_at": "2026-04-06T15:11:35.948541",
   "topic": "ai_trending",
   "tone": "educational",
   "voice": "nova",
@@ -10,18 +10,18 @@
     "tts_model": "gpt-4o-mini-tts"
   },
   "inputs": {
-    "requested_urls": [
-      "https://en.wikipedia.org/wiki/Artificial_intelligence"
+    "requested_urls": [],
+    "requested_files": [
+      "source.txt"
     ],
-    "requested_files": [],
-    "successful_urls": [
+    "successful_urls": [],
+    "failed_urls": [],
+    "successful_files": [
       {
-        "url": "https://en.wikipedia.org/wiki/Artificial_intelligence",
-        "saved_source_file": "output\\ai_trending\\sources\\source_1_en_wikipedia_org.txt"
+        "original_file": "source.txt",
+        "saved_source_file": "output\\ai_trending\\sources\\source_1_source.txt"
       }
     ],
-    "failed_urls": [],
-    "successful_files": [],
     "failed_files": []
   },
   "outputs": {

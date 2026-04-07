@@ -1,0 +1,9 @@
+Title: How A.I. Helped One Man (and His Brother) Build a $1.8 Billion Company
+URL: https://www.nytimes.com/2026/04/02/technology/ai-billion-dollar-company-medvi.html
+Published: Thu, 02 Apr 2026 09:02:30 +0000
+Author: Erin Griffith
+
+Description:
+Who needs more than two employees when artificial intelligence can do so many corporate tasks? It’s super efficient — and a little bit lonely.
+
+[This is a demo - in real RSS podcast, the full article would be fetched from the URL]

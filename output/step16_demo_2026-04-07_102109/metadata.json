@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-04-07T10:21:10-05:00",
+  "episode_id": "step16_demo_2026-04-07_102109",
+  "topic": "step16_demo",
+  "tone": "educational",
+  "voice": "nova",
+  "length": "medium",
+  "outputs": {
+    "episode_dir": "output/step16_demo_2026-04-07_102109",
+    "script_file": "output/step16_demo_2026-04-07_102109/script.txt",
+    "show_notes_file": "output/step16_demo_2026-04-07_102109/show_notes.txt",
+    "audio_file": "output/step16_demo_2026-04-07_102109/podcast_nova.mp3"
+  }
+}

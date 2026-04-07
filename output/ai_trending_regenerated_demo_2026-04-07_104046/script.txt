@@ -1,0 +1,25 @@
+Regenerated Episode: ai_trending
+
+[This is a MOCK regenerated episode for demonstration purposes]
+
+Welcome to this regenerated episode on ai_trending!
+
+This episode was regenerated from the original episode's metadata and sources.
+The original episode was created on 2026-04-06T15:11:35.948541.
+
+In a real regeneration:
+1. The LLM would read all source materials
+2. Generate a fresh script using the same settings (educational tone, medium length)
+3. The script might be different from the original due to LLM variability
+4. Audio would be generated with the nova voice
+
+Main Talking Points:
+- Point 1: This demonstrates the regeneration workflow
+- Point 2: Source files are preserved and reused
+- Point 3: New episode folder created with '_regenerated_' suffix
+
+Conclusion:
+Thank you for exploring Step 18! The regeneration feature allows you to recreate
+episodes from saved metadata and sources.
+
+[End of mock script]

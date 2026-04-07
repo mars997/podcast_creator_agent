@@ -1,0 +1,25 @@
+Show Notes - AI in Healthcare Newsletter
+
+Summary:
+This episode explores how artificial intelligence is revolutionizing healthcare,
+from medical imaging to drug discovery and personalized medicine.
+
+Content Source: Pasted newsletter/article
+Word Count: 207 words
+Input Method: Pasted text (Step 20 feature)
+
+Key Takeaways:
+1. AI systems can analyze medical imaging with expert-level accuracy
+2. Machine learning is accelerating drug discovery and reducing costs
+3. Personalized medicine powered by AI enables tailored treatment plans
+
+Challenges Addressed:
+- Privacy and data security concerns
+- Need for transparent AI decision-making
+- Ensuring AI augments human judgment
+
+This episode demonstrates Step 20's pasted-content ingestion feature, which allows
+you to create podcast episodes from any text you can copy and paste - no file
+creation required!
+
+[Demo show notes - Step 20]
