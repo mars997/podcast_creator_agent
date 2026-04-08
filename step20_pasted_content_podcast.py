@@ -158,28 +158,17 @@ def main():
 
     # Update episode index
     episode_summary = create_episode_summary(
-        created_at=created_at,
-        episode_id=unique_episode_id,
-        topic=topic,
-        tone=tone,
-        voice=voice,
-        length=length,
+        metadata=metadata,
         episode_dir=episode_dir,
-        metadata_file=metadata_file,
-        script_file=script_file,
-        show_notes_file=show_notes_file,
-        audio_file=audio_file,
-        num_successful_urls=0,
-        num_successful_files=1,
-        num_failed_urls=0,
-        num_failed_files=0
+        additional_fields={
+            "num_successful_urls": 0,
+            "num_successful_files": 1,
+            "num_failed_urls": 0,
+            "num_failed_files": 0,
+            "source_type": "pasted_content",
+            "content_word_count": len(content.split())
+        }
     )
-
-    # Add pasted content specific fields
-    episode_summary.update({
-        "source_type": "pasted_content",
-        "content_word_count": len(content.split())
-    })
 
     index_file = output_root / "episode_index.json"
     update_episode_index(index_file, episode_summary)

@@ -138,3 +138,10 @@ output/
 *.mp3
 *.wav
 episode_index.json
+
+# ignore python enviroment 
+.venv/
+venv/
+.env
+__pycache__/
+*.pyc

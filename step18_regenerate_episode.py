@@ -85,7 +85,14 @@ def main():
 
     # Regenerate episode using core module
     try:
-        regenerate_episode(llm_provider, tts_provider, metadata, episode_dir_path, Path(OUTPUT_ROOT))
+        regenerate_episode(
+            original_metadata=metadata,
+            episode_dir_path=episode_dir_path,
+            llm_provider=llm_provider,
+            tts_provider=tts_provider,
+            output_root=output_root,
+            index_path=index_path
+        )
         print("\nStep 18 complete.")
     except Exception as e:
         print(f"\nError during regeneration: {e}")
