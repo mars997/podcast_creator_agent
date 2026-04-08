@@ -1,0 +1,25 @@
+{
+  "created_at": "2026-04-07T12:00:00",
+  "episode_id": "test_episode_2026-04-07_120000",
+  "topic": "Test Episode",
+  "tone": "educational",
+  "voice": "nova",
+  "length": "medium",
+  "word_range_target": "500 to 700 words",
+  "providers": {
+    "llm_provider": "openai",
+    "llm_model": "gpt-4.1-mini",
+    "tts_provider": "openai",
+    "tts_model": "gpt-4o-mini-tts"
+  },
+  "models": {
+    "script_model": "gpt-4.1-mini",
+    "tts_model": "gpt-4o-mini-tts"
+  },
+  "outputs": {
+    "episode_dir": "output/test_episode",
+    "script_file": "output/test_episode/script.txt",
+    "show_notes_file": "output/test_episode/show_notes.txt",
+    "audio_file": "output/test_episode/podcast_nova.mp3"
+  }
+}
