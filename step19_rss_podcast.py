@@ -1,219 +1,31 @@
-import json
-import os
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlparse
 
-import feedparser
-import requests
-from bs4 import BeautifulSoup
-from dotenv import load_dotenv
-# Import provider abstraction (Step 21+)
-from providers import get_default_config, create_llm_provider, create_tts_provider
+from core.provider_setup import initialize_providers, get_provider_info
+from core.content_generation import build_script, build_show_notes, generate_audio
+from core.validation import sanitize_filename, validate_choice, get_word_range
+from core.user_input import get_user_input
+from core.file_utils import save_text_file, ensure_directory, save_json
+from core.source_management import fetch_article_text
+from core.episode_management import save_episode_metadata, create_episode_summary, update_episode_index
+from core.rss_utils import parse_rss_feed, save_rss_info
 import config
 
 
-# =========================
-# CONFIG
-# =========================
-DEFAULT_TONE = "educational"
+# Initialize providers
+llm_provider, tts_provider = initialize_providers()
+
+# Configuration
+DEFAULT_TONE = config.DEFAULT_TONE
 DEFAULT_VOICE = config.PROVIDER_MODELS.get(tts_provider.provider_name, {}).get("default_voice", "nova")
-DEFAULT_LENGTH = "medium"
+DEFAULT_LENGTH = config.DEFAULT_LENGTH
 DEFAULT_NUM_ARTICLES = 3
-OUTPUT_ROOT = "output"
+OUTPUT_ROOT = config.OUTPUT_ROOT
 
-SCRIPT_MODEL = "gpt-4.1-mini"
-TTS_MODEL = "gpt-4o-mini-tts"
-
-VALID_TONES = {"casual", "professional", "educational"}
+VALID_TONES = config.VALID_TONES
 VALID_VOICES = set(tts_provider.available_voices)
-VALID_LENGTHS = {"short", "medium", "long"}
-
-
-load_dotenv()
-
-# Get provider configuration (auto-detects available providers)
-provider_config = get_default_config()
-
-# Create LLM and TTS providers
-llm_provider = create_llm_provider(provider_config)
-tts_provider = create_tts_provider(provider_config)
-
-# Display active providers
-print(f"\n[Provider Info]")
-print(f"  LLM: {llm_provider.provider_name.upper()} ({llm_provider.model_name})")
-print(f"  TTS: {tts_provider.provider_name.upper()} ({tts_provider.model_name})")
-print()
-
-
-def sanitize_filename(text: str) -> str:
-    """Sanitize text for use in filenames"""
-    cleaned = "".join(c if c.isalnum() or c in (" ", "-", "_") else "" for c in text).strip()
-    return cleaned.replace(" ", "_")
-
-
-def get_word_range(length_choice: str) -> str:
-    """Get word range based on length choice"""
-    mapping = {
-        "short": "300 to 450 words",
-        "medium": "500 to 700 words",
-        "long": "800 to 1100 words",
-    }
-    return mapping.get(length_choice.lower(), "500 to 700 words")
-
-
-def get_user_input(prompt_text: str, default_value: str) -> str:
-    """Get user input with default value"""
-    user_value = input(f"{prompt_text} [{default_value}]: ").strip().lower()
-    return user_value if user_value else default_value
-
-
-def validate_choice(value: str, valid_set: set, field_name: str) -> str:
-    """Validate user choice against valid set"""
-    if value not in valid_set:
-        raise ValueError(f"Invalid {field_name}: {value}")
-    return value
-
-
-def parse_rss_feed(feed_url: str, max_items: int = 10) -> list[dict]:
-    """Parse RSS feed and extract article information"""
-    print(f"\nFetching RSS feed: {feed_url}")
-
-    try:
-        feed = feedparser.parse(feed_url)
-
-        if feed.bozo and not feed.entries:
-            raise ValueError(f"Failed to parse RSS feed: {feed.get('bozo_exception', 'Unknown error')}")
-
-        if not feed.entries:
-            raise ValueError("No entries found in RSS feed")
-
-        print(f"  Feed title: {feed.feed.get('title', 'Unknown')}")
-        print(f"  Total entries: {len(feed.entries)}")
-
-        articles = []
-        for entry in feed.entries[:max_items]:
-            article = {
-                'title': entry.get('title', 'Untitled'),
-                'link': entry.get('link', ''),
-                'description': entry.get('description', '') or entry.get('summary', ''),
-                'published': entry.get('published', '') or entry.get('updated', ''),
-                'author': entry.get('author', ''),
-            }
-            articles.append(article)
-
-        return articles
-
-    except Exception as e:
-        raise ValueError(f"Error parsing RSS feed: {e}")
-
-
-def fetch_article_text(url: str) -> str:
-    """Fetch article content from URL"""
-    headers = {
-        "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/124.0.0.0 Safari/537.36"
-        )
-    }
-
-    response = requests.get(url, headers=headers, timeout=20)
-    response.raise_for_status()
-
-    soup = BeautifulSoup(response.text, "html.parser")
-
-    for tag in soup(["script", "style", "noscript", "header", "footer", "nav", "aside"]):
-        tag.decompose()
-
-    title = soup.title.get_text(strip=True) if soup.title else "Untitled"
-
-    paragraphs = [p.get_text(" ", strip=True) for p in soup.find_all("p")]
-    paragraphs = [p for p in paragraphs if len(p) > 40]
-
-    article_text = "\n".join(paragraphs[:80]).strip()
-
-    if not article_text:
-        raise ValueError(f"Could not extract article text from: {url}")
-
-    return f"Title: {title}\nURL: {url}\n\n{article_text}"
-
-
-def build_script(topic: str, tone: str, word_range: str, source_material: str) -> str:
-    """Generate podcast script using LLM"""
-    prompt = f"""
-You are a podcast writer creating a solo-host podcast episode.
-
-Episode topic: {topic}
-Tone: {tone}
-Target length: {word_range}
-
-Use the source materials below to write the episode.
-Combine the ideas clearly and naturally.
-Stay grounded in the sources and do not invent specific facts not supported by them.
-
-Requirements:
-- A catchy episode title on the first line
-- A short welcome intro
-- 3 clear main talking points
-- A short conclusion
-- Sound natural when spoken aloud
-- No bullet points
-- Beginner-friendly
-- Smooth transitions between sections
-
-Source materials:
-{source_material}
-"""
-
-    return llm_provider.generate_text(prompt)
-
-
-def build_show_notes(script: str) -> str:
-    """Generate show notes from script"""
-    prompt = f"""
-Based on the following podcast script, create show notes.
-
-Requirements:
-- Include the episode title
-- Include a short summary
-- Include 3 key takeaways
-- Clean and readable format
-
-Podcast script:
-{script}
-"""
-
-    return llm_provider.generate_text(prompt)
-
-
-def generate_audio(script: str, voice: str, audio_path: Path) -> None:
-    """Generate audio file from script using TTS"""
-    tts_provider.generate_audio(script, voice, audio_path)
-
-
-def save_json(data: dict | list, file_path: Path) -> None:
-    """Save data to JSON file"""
-    file_path.write_text(
-        json.dumps(data, indent=2, ensure_ascii=False),
-        encoding="utf-8"
-    )
-
-
-def update_episode_index(index_path: Path, episode_summary: dict) -> None:
-    """Update the global episode index"""
-    if index_path.exists():
-        try:
-            index_data = json.loads(index_path.read_text(encoding="utf-8"))
-            if not isinstance(index_data, list):
-                index_data = []
-        except Exception:
-            index_data = []
-    else:
-        index_data = []
-
-    index_data.append(episode_summary)
-    save_json(index_data, index_path)
+VALID_LENGTHS = config.VALID_LENGTHS
 
 
 def main():
@@ -249,8 +61,8 @@ def main():
 
     word_range = get_word_range(length)
 
-    # Parse RSS feed
-    articles = parse_rss_feed(feed_url, max_items=num_articles * 2)  # Fetch extra in case some fail
+    # Parse RSS feed using core module
+    articles = parse_rss_feed(feed_url, max_items=num_articles * 2)
 
     if not articles:
         raise ValueError("No articles found in RSS feed")
@@ -308,16 +120,10 @@ def main():
     unique_episode_id = f"{safe_topic}_{timestamp_suffix}"
 
     output_root = Path(OUTPUT_ROOT)
-    output_root.mkdir(parents=True, exist_ok=True)
+    episode_dir = ensure_directory(output_root / unique_episode_id)
+    sources_dir = ensure_directory(episode_dir / "sources")
 
-    episode_dir = output_root / unique_episode_id
-    episode_dir.mkdir(parents=True, exist_ok=True)
-
-    sources_dir = episode_dir / "sources"
-    sources_dir.mkdir(exist_ok=True)
-
-    # Save RSS feed info
-    rss_info_file = sources_dir / "rss_feed_info.json"
+    # Save RSS feed info using core module
     rss_info = {
         'feed_url': feed_url,
         'fetched_at': datetime.now().isoformat(),
@@ -325,7 +131,7 @@ def main():
         'num_articles_successful': len(successful_articles),
         'articles': successful_articles
     }
-    save_json(rss_info, rss_info_file)
+    rss_info_file = save_rss_info(sources_dir, rss_info)
     print(f"\n  RSS info saved: {rss_info_file.name}")
 
     # Save article sources
@@ -334,38 +140,38 @@ def main():
         domain = urlparse(article_url).netloc.replace(".", "_")
         source_file = sources_dir / f"article_{i}_{domain}.txt"
 
-        # Find the corresponding source text
         if i <= len(all_sources):
-            source_file.write_text(all_sources[i-1], encoding="utf-8")
+            save_text_file(all_sources[i-1], source_file)
             print(f"  Saved article {i}: {source_file.name}")
 
     combined_source_text = "\n\n" + ("\n\n" + "=" * 60 + "\n\n").join(all_sources)
 
     # Generate script
     print("\nGenerating podcast script...")
-    script = build_script(topic, tone, word_range, combined_source_text)
+    script = build_script(llm_provider, topic, tone, word_range, combined_source_text)
 
     script_file = episode_dir / "script.txt"
-    script_file.write_text(script, encoding="utf-8")
+    save_text_file(script, script_file)
     print(f"  Script saved: {script_file.name}")
 
     # Generate show notes
     print("\nGenerating show notes...")
-    show_notes = build_show_notes(script)
+    show_notes = build_show_notes(llm_provider, script)
 
     show_notes_file = episode_dir / "show_notes.txt"
-    show_notes_file.write_text(show_notes, encoding="utf-8")
+    save_text_file(show_notes, show_notes_file)
     print(f"  Show notes saved: {show_notes_file.name}")
 
     # Generate audio
     audio_file = episode_dir / f"podcast_{voice}.mp3"
 
     print("\nGenerating audio...")
-    generate_audio(script, voice, audio_file)
+    generate_audio(tts_provider, script, voice, audio_file)
     print(f"  Audio saved: {audio_file.name}")
 
     # Save metadata
     created_at = datetime.now().isoformat()
+    provider_info = get_provider_info(llm_provider, tts_provider)
 
     metadata = {
         "created_at": created_at,
@@ -384,12 +190,7 @@ def main():
             "articles": successful_articles,
             "failed_articles": failed_articles
         },
-        "providers": {
-            "llm_provider": llm_provider.provider_name,
-            "llm_model": llm_provider.model_name,
-            "tts_provider": tts_provider.provider_name,
-            "tts_model": tts_provider.model_name
-        },
+        "providers": provider_info,
         "models": {
             "script_model": llm_provider.model_name,
             "tts_model": tts_provider.model_name
@@ -403,27 +204,34 @@ def main():
         }
     }
 
-    metadata_file = episode_dir / "metadata.json"
-    save_json(metadata, metadata_file)
+    metadata_file = save_episode_metadata(episode_dir, metadata)
     print(f"  Metadata saved: {metadata_file.name}")
 
     # Update episode index
-    episode_summary = {
-        "created_at": created_at,
-        "episode_id": unique_episode_id,
-        "topic": topic,
-        "tone": tone,
-        "voice": voice,
-        "length": length,
+    episode_summary = create_episode_summary(
+        created_at=created_at,
+        episode_id=unique_episode_id,
+        topic=topic,
+        tone=tone,
+        voice=voice,
+        length=length,
+        episode_dir=episode_dir,
+        metadata_file=metadata_file,
+        script_file=script_file,
+        show_notes_file=show_notes_file,
+        audio_file=audio_file,
+        num_successful_urls=len(successful_articles),
+        num_successful_files=0,
+        num_failed_urls=len(failed_articles),
+        num_failed_files=0
+    )
+
+    # Add RSS-specific fields
+    episode_summary.update({
         "source_type": "rss_feed",
-        "episode_dir": str(episode_dir),
-        "metadata_file": str(metadata_file),
-        "script_file": str(script_file),
-        "show_notes_file": str(show_notes_file),
-        "audio_file": str(audio_file),
         "num_rss_articles": len(successful_articles),
         "rss_feed_url": feed_url
-    }
+    })
 
     index_file = output_root / "episode_index.json"
     update_episode_index(index_file, episode_summary)

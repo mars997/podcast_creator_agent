@@ -75,7 +75,7 @@ You need at least ONE of the following API keys:
 
 3. Install the Gemini SDK:
    ```bash
-   pip install google-generativeai
+   pip install google-genai
    ```
 
 4. Configure provider preference:
@@ -246,13 +246,13 @@ This allows:
 3. Ensure no extra spaces around the `=`
 4. Restart your terminal/IDE
 
-### "google-generativeai package not installed"
+### "google-genai package not installed"
 
 **Problem**: Trying to use Gemini without the SDK.
 
 **Solution**:
 ```bash
-pip install google-generativeai
+pip install google-genai
 ```
 
 ### "openai package not installed"

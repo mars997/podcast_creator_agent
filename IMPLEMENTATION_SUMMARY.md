@@ -16,7 +16,7 @@ Successfully implemented a provider abstraction layer that allows the podcast_cr
 ### Configuration
 - `config.py` - Centralized configuration module
 - `.env.example` - Environment variable documentation and examples
-- `requirements.txt` - Updated dependencies (added google-generativeai)
+- `requirements.txt` - Updated dependencies (added google-genai)
 
 ### Validation & Documentation
 - `validate_step21.py` - Comprehensive validation script (7/7 tests passing)
@@ -129,9 +129,9 @@ The provider abstraction is complete. Next step is to create:
 
 ## Technical Debt Notes
 
-- `google-generativeai` package shows deprecation warning
-  - Suggests migration to `google.genai` in future
-  - Current implementation works but may need update
+- ~~`google-generativeai` package shows deprecation warning~~ **RESOLVED**
+  - ✅ Migrated to `google-genai` package (April 2026)
+  - No more deprecation warnings
 - Gemini TTS implementation is placeholder
   - API structure may need adjustment
   - Recommend OpenAI TTS until Gemini TTS is stable
@@ -139,7 +139,7 @@ The provider abstraction is complete. Next step is to create:
 ## Dependencies Added
 
 ```txt
-google-generativeai>=0.8.0
+google-genai>=0.1.0
 ```
 
 ## Documentation Created

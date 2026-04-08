@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import List
 
 try:
-    import google.generativeai as genai
+    from google import genai
 except ImportError:
     genai = None
 
@@ -22,8 +22,8 @@ class GeminiLLMProvider(BaseLLMProvider):
     def __init__(self, api_key: str = None, model: str = "gemini-1.5-flash"):
         if genai is None:
             raise ImportError(
-                "google-generativeai package not installed.\n"
-                "Install it with: pip install google-generativeai"
+                "google-genai package not installed.\n"
+                "Install it with: pip install google-genai"
             )
 
         self.api_key = api_key or os.getenv("GOOGLE_API_KEY")
@@ -73,8 +73,8 @@ class GeminiTTSProvider(BaseTTSProvider):
     def __init__(self, api_key: str = None, model: str = "gemini-2.5-flash"):
         if genai is None:
             raise ImportError(
-                "google-generativeai package not installed.\n"
-                "Install it with: pip install google-generativeai"
+                "google-genai package not installed.\n"
+                "Install it with: pip install google-genai"
             )
 
         self.api_key = api_key or os.getenv("GOOGLE_API_KEY")

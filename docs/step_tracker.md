@@ -397,7 +397,7 @@ Use the following template for every future step entry.
   - Updated: `docs/development_plan.md` (added Phase 5A)
   - Updated: `docs/step_tracker.md`
 - Commands run:
-  - `pip install google-generativeai` (installed Gemini SDK)
+  - `pip install google-genai` (installed Gemini SDK - migrated from deprecated google-generativeai)
   - `python validate_step21.py` (ran validation)
 - Validation results:
   - [PASS] Provider Package Structure (all 5 files exist)
@@ -415,9 +415,9 @@ Use the following template for every future step entry.
   - Verified provider detection logic (no API keys in test env)
   - Confirmed backward compatibility (defaults to OpenAI)
 - Open issues:
-  - Note: google-generativeai package shows deprecation warning
-    - Suggests migrating to google.genai package in future
-    - Current implementation works but may need update later
+  - ~~Note: google-generativeai package shows deprecation warning~~ **RESOLVED (April 2026)**
+    - ✅ Migrated to google-genai package
+    - ✅ No more deprecation warnings
   - No actual API calls tested yet (requires Step 22 implementation)
 - Notes for next step:
   - Step 21 successfully creates provider abstraction layer
