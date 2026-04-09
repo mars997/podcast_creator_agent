@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip install:*)",
+      "Bash(python -c ':*)",
+      "Bash(python -c \"from dotenv import load_dotenv; load_dotenv\\(\\); import os; print\\('OPENAI_API_KEY:', 'SET' if os.getenv\\('OPENAI_API_KEY'\\) else 'NOT SET'\\); print\\('GOOGLE_API_KEY:', 'SET' if os.getenv\\('GOOGLE_API_KEY'\\) else 'NOT SET'\\)\")",
+      "Bash(ls -d output/*_2026-04-08_1*)",
+      "Bash(python test_phases_9_10.py)",
+      "Bash(streamlit run:*)",
+      "Bash(python test_refactored_system.py)",
+      "Bash(python test_voice_improvements.py)",
+      "Bash(grep -E \"\\\\.py$\")",
+      "Bash(ffmpeg -version)",
+      "Bash(python test_audio_chunking.py)",
+      "WebFetch(domain:nicevoice.org)",
+      "WebSearch",
+      "Bash(pip show:*)",
+      "Bash(curl -s http://localhost:8501)",
+      "Bash(python -c \"from TTS.api import TTS; print\\('Import successful'\\)\")",
+      "Bash(python -c \"from TTS.api import TTS; print\\('✓ Coqui TTS ready!'\\)\")",
+      "Bash(python -c \"from TTS.api import TTS; print\\('Coqui TTS ready!'\\)\")",
+      "Bash(python -c \"from TTS.api import TTS; print\\('SUCCESS: Coqui TTS is ready!'\\)\")",
+      "Bash(pkill -f streamlit)",
+      "Bash(taskkill /F /IM streamlit.exe)",
+      "Bash(python -c \"import os; os.environ['COQUI_TOS_AGREED'] = '1'; from TTS.api import TTS; tts = TTS\\('tts_models/multilingual/multi-dataset/xtts_v2'\\); print\\('Model downloaded successfully!'\\)\")",
+      "Bash(python -c \"import ssl; ssl._create_default_https_context = ssl._create_unverified_context; import os; os.environ['COQUI_TOS_AGREED'] = '1'; os.environ['HF_HUB_DISABLE_TELEMETRY'] = '1'; from TTS.api import TTS; tts = TTS\\('tts_models/multilingual/multi-dataset/xtts_v2'\\); print\\('Success!'\\)\")",
+      "Bash(python -m py_compile step44_web_ui_v2.py core/created_personas.py core/unified_generation.py)",
+      "Bash(python -m py_compile step44_web_ui_v2.py)",
+      "Bash(python -m py_compile step44_web_ui_v2.py core/unified_generation.py)"
+    ]
+  }
+}

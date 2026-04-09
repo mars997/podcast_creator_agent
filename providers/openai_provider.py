@@ -53,11 +53,26 @@ class OpenAILLMProvider(BaseLLMProvider):
 
 
 class OpenAITTSProvider(BaseTTSProvider):
-    """OpenAI TTS provider maintaining existing API patterns"""
+    """
+    OpenAI TTS provider with HD model support and speed control.
+
+    Supports:
+    - HD model (tts-1-hd) for better quality
+    - Speed control (0.25 - 4.0)
+    - All 6 OpenAI voices
+    """
 
     VALID_VOICES = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]
 
-    def __init__(self, api_key: str = None, model: str = "gpt-4o-mini-tts"):
+    def __init__(self, api_key: str = None, model: str = "tts-1-hd", use_hd: bool = True):
+        """
+        Initialize OpenAI TTS provider
+
+        Args:
+            api_key: OpenAI API key (defaults to env var)
+            model: TTS model (tts-1 or tts-1-hd)
+            use_hd: Use HD model for better quality (default: True)
+        """
         if OpenAI is None:
             raise ImportError(
                 "openai package not installed.\n"
@@ -71,25 +86,44 @@ class OpenAITTSProvider(BaseTTSProvider):
                 "Please set OPENAI_API_KEY in your .env file."
             )
         self.client = OpenAI(api_key=self.api_key)
+
+        # Use HD model by default for better quality
+        if use_hd and model == "gpt-4o-mini-tts":
+            # Legacy model name - upgrade to tts-1-hd
+            model = "tts-1-hd"
+        elif use_hd and model == "tts-1":
+            model = "tts-1-hd"
+
         self._model = model
+        self._use_hd = use_hd
 
     def generate_audio(
-        self, text: str, voice: str, output_path: Path, **kwargs
+        self, text: str, voice: str, output_path: Path, speed: float = 1.0, **kwargs
     ) -> None:
         """
-        Generate audio using OpenAI TTS.
-        Preserves existing streaming pattern.
+        Generate audio using OpenAI TTS with speed control.
+
+        Args:
+            text: Text to convert to speech
+            voice: Voice ID (alloy, echo, fable, onyx, nova, shimmer)
+            output_path: Where to save MP3 file
+            speed: Speaking rate (0.25 - 4.0, default: 1.0)
+            **kwargs: Additional parameters (ignored for compatibility)
         """
         if voice not in self.VALID_VOICES:
             raise ValueError(
                 f"Invalid voice '{voice}'. Must be one of: {', '.join(self.VALID_VOICES)}"
             )
 
-        # Preserves existing streaming pattern
+        # Clamp speed to valid range
+        speed = max(0.25, min(4.0, speed))
+
+        # Generate with speed parameter
         with self.client.audio.speech.with_streaming_response.create(
             model=self._model,
             voice=voice,
             input=text,
+            speed=speed,  # NEW: Speed control
         ) as response:
             response.stream_to_file(output_path)
 

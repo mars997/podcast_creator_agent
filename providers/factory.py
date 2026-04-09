@@ -7,10 +7,14 @@ Includes smart fallback logic and provider detection.
 import os
 from dataclasses import dataclass
 from typing import Optional
+from dotenv import load_dotenv
 
 from .base import BaseLLMProvider, BaseTTSProvider
 from .gemini_provider import GeminiLLMProvider, GeminiTTSProvider
 from .openai_provider import OpenAILLMProvider, OpenAITTSProvider
+
+# Load environment variables
+load_dotenv()
 
 
 @dataclass

@@ -1,108 +1,183 @@
 # CLAUDE.md
 
-## Project identity
-This repository is `podcast_creator_agent`.
+## Project
+AI Podcast Creator Agent
 
-## Primary objective
-Continue development from **Step 16 onward** using the roadmap in `docs/development_plan.md`.
+## Purpose
+This repository builds an AI-powered podcast creation system that can:
+- ingest content from topics, pasted text, files, URLs, RSS, PDFs, and other sources
+- generate podcast scripts and show notes
+- render audio
+- track metadata and episode history
+- evolve toward a richer UI and publishing workflow
 
-## Non-negotiable workflow
-1. Read `docs/development_plan.md` and `docs/step_tracker.md` before doing any work.
-2. Work on **one step only** per cycle.
-3. Never start the next step until the current step is:
-   - implemented
-   - tested
-   - validated
-   - logged in `docs/step_tracker.md`
-4. After completing a step, stop and wait for user review unless the user explicitly says to continue.
-5. Never mark a step complete unless the tests or validations were actually run and passed.
+## Canonical planning files
+Use these files as the source of truth:
+- `development_plan.md`
+- `step_tracker.md`
 
-## Starting point
-- Steps 1–15 are already completed.
-- Begin at **Step 16** unless `docs/step_tracker.md` says a later step is active.
+Follow the plan strictly unless the user explicitly overrides it.
 
-## Required operating behavior
-Before coding:
-- Inspect the current repository structure.
-- Identify the files relevant to the active step.
-- Summarize the implementation plan for that step in plain English.
-- Make the smallest safe change that satisfies the step.
+---
 
-During coding:
-- Avoid unrelated refactors.
-- Preserve backward compatibility when practical.
-- Do not delete or overwrite `.env`, local secrets, or user configuration.
-- Do not introduce major dependencies unless clearly necessary for the active step.
+## Non-negotiable working rules
+1. Progress strictly one step at a time.
+2. Do not begin the next step until the current step is implemented, tested, and validated.
+3. Prefer the smallest possible code change that satisfies the current step.
+4. Keep all work grounded in the current codebase and existing project structure.
+5. Preserve secrets and local environment files such as `.env`.
+6. Do not rewrite the whole project unless the user explicitly asks for a major refactor.
+7. If code has been consolidated or refactored, map it back to the plan rather than inventing a new plan.
+8. Be explicit about what was tested and what remains unverified.
+9. Favor stable demo-friendly functionality over broad but fragile feature additions.
 
-After coding:
-- Run the relevant checks.
-- Prefer targeted tests first, then broader tests if needed.
-- Perform a realistic manual validation for the active feature.
-- Update `docs/step_tracker.md` with:
-  - status
-  - files changed
-  - commands run
-  - validation results
-  - open issues
-  - notes for next step
+---
 
-## Validation rules
-Use the best matching commands that exist in this repository. If a command does not exist, say so explicitly and use the closest available alternative.
+## Current state assumption
+Assume Steps 1–20 are already complete unless the user says otherwise or the code proves otherwise.
 
-Recommended validation order:
-1. Formatting or lint check
-2. Unit tests
-3. Integration or workflow test for the active step
-4. Manual validation of user-facing behavior
+When working on the repository:
+- inspect the current codebase
+- identify which files implement each completed step
+- preserve working behavior
+- fix regressions with targeted changes
 
-Possible commands, only if available in this repo:
-- `ruff check .`
-- `ruff format --check .`
-- `python -m pytest`
-- `python -m pytest tests -q`
-- `python main.py`
-- `python app.py`
+---
 
-## Completion gate
-A step is only complete when all are true:
-- The code change for the active step is implemented.
-- The relevant validations were run.
-- The observed results are recorded.
-- `docs/step_tracker.md` is updated.
-- No unresolved blocker prevents normal use of the active step.
+## Voice and character feature policy
+The product direction now includes a stronger focus on:
+- fun voice persona selection
+- context-aware narration style
+- multi-character podcast generation
+- multi-voice rendering
 
-## Blocker handling
-If blocked:
-- Do not move to the next step.
-- Explain the blocker clearly.
-- Record the blocker in `docs/step_tracker.md`.
-- Suggest the smallest next action needed to unblock the step.
+### Important safety / product rule
+Do NOT implement celebrity impersonation or copyrighted character imitation as named product features.
 
-## Output style for each work cycle
-For each step, produce a short structured summary:
-- Current step
-- What you found
-- What you changed
-- What commands you ran
-- What passed or failed
-- What still needs review
+Do NOT create personas named after:
+- celebrities
+- public figures
+- politicians
+- fictional copyrighted characters
 
-## Step-specific guidance for Step 16
-Goal:
-- Prevent episode overwrites by creating unique episode IDs and timestamped output folders.
+Instead, use original descriptive personas such as:
+- Documentary Narrator
+- Calm Educator
+- News Anchor
+- Stand-up Comedian
+- Cartoon Chaos
+- Strict Analyst
+- Debate Mode
+- Late Night Host
+- Dramatic Storyteller
+- Hype Speaker
 
-Expected example:
-- `AI_overview_2026-04-06_101500`
+The value should come from:
+- script style
+- pacing
+- delivery instructions
+- role-based multi-voice rendering
 
-Minimum acceptance for Step 16:
-- Re-running the same topic twice should produce two distinct episode folders.
-- Metadata and episode index behavior should still function correctly.
-- Output paths should point to the new unique folder paths.
+---
 
-## Repo file conventions
-Assume these files exist or should exist:
-- `docs/development_plan.md`
-- `docs/step_tracker.md`
-- `CLAUDE.md`
+## When implementing future voice features
+For persona-driven audio:
+- centralize persona definitions in config
+- each persona should include:
+  - label
+  - base TTS voice
+  - style prompt
+  - pacing/delivery guidance
+- apply persona choices to both script generation and TTS rendering
 
-If these files are missing in the repo, recreate them from the latest committed content or ask the user to restore them before continuing.
+For multi-character mode:
+- detect useful roles from source content when possible
+- support structured dialogue generation
+- support fallback to single-host mode when role detection is weak
+- split scripts by speaker labels for rendering
+- assign persona/voice per speaker
+- stitch generated segments into one final audio file
+
+---
+
+## Testing expectations
+For every step:
+1. explain what changed
+2. explain how to run it
+3. run or describe the validation path
+4. confirm whether it passed
+5. update `step_tracker.md` only after validation
+
+When stabilizing a refactored branch:
+- test all implemented features up to the current completed step
+- document pass/fail clearly
+- fix regressions before recommending merge
+
+---
+
+## Preferred repo structure direction
+As the project grows, prefer modular organization such as:
+- `ingestion/`
+- `generation/`
+- `audio/`
+- `storage/`
+- `ui/`
+- `config/`
+
+But do not force a large restructure unless needed for the current step.
+
+---
+
+## UI guidance
+When implementing the future UI:
+- keep it simple and demo-friendly
+- allow users to:
+  - paste text
+  - upload files
+  - enter URLs
+  - choose tone
+  - choose persona
+  - choose podcast mode (single-host / multi-character)
+- show:
+  - script preview
+  - show notes preview
+  - audio playback
+  - output folder path
+  - episode history if available
+
+---
+
+## Provider guidance
+Future provider abstraction should support:
+- OpenAI
+- Gemini
+- mixed-provider workflows
+
+But maintain backward compatibility with already generated episodes and metadata where feasible.
+
+---
+
+## Merge / refactor guidance
+If asked to validate a refactored branch before merge:
+- treat the original development plan as source of truth
+- map refactored code to original steps
+- create a validation checklist
+- test all completed features
+- fix targeted regressions
+- provide a merge readiness summary
+
+---
+
+## Output style when helping in this repo
+Be:
+- precise
+- structured
+- implementation-focused
+- honest about uncertainty
+- careful not to overbuild
+
+Always optimize for:
+- correctness
+- maintainability
+- demo value
+- incremental progress

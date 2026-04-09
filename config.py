@@ -9,7 +9,7 @@ DEFAULT_PROVIDER = "openai"
 PROVIDER_MODELS = {
     "openai": {
         "llm_model": "gpt-4.1-mini",
-        "tts_model": "gpt-4o-mini-tts",
+        "tts_model": "tts-1-hd",  # HD model for better quality
         "api_key_env": "OPENAI_API_KEY",
         "voices": ["alloy", "echo", "fable", "onyx", "nova", "shimmer"],
         "default_voice": "nova",

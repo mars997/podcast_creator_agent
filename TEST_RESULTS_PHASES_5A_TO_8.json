@@ -1,0 +1,181 @@
+{
+  "timestamp": "2026-04-08T15:12:01.966384",
+  "total_tests": 17,
+  "passed": 10,
+  "failed": 7,
+  "skipped": 0,
+  "errors": 0,
+  "total_duration_seconds": 427.814611,
+  "results": [
+    {
+      "status": "fail",
+      "returncode": 1,
+      "duration": 2.068982,
+      "stdout": "\n======================================================================\nStep 25: Multi-Provider Podcast Generation\n======================================================================\n\nAvailable providers:\n",
+      "stderr": "Traceback (most recent call last):\n  File \"C:\\Users\\ge000m\\OneDrive - NRG Energy, Inc\\Alex\\Hackthon\\04 2026\\podcast_creator_agent\\step25_multi_provider_podcast.py\", line 210, in <module>\n    main()\n  File \"C:\\Users\\ge000m\\OneDrive - NRG Energy, Inc\\Alex\\Hackthon\\04 2026\\podcast_creator_agent\\step25_multi_provider_podcast.py\", line 36, in main\n    print(f\"  {provider}: {'\\u2713' if status else '\\u2717'}\")\n  File \"C:\\Users\\ge000m\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\encodings\\cp1252.py\", line 19, in encode\n    return codecs.charmap_encode(input,self.errors,encoding_table)[0]\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nUnicodeEncodeError: 'charmap' codec can't encode character '\\u2713' in position 10: character maps to <undefined>\n",
+      "step": "25",
+      "name": "Multi-Provider Podcast",
+      "file": "step25_multi_provider_podcast.py"
+    },
+    {
+      "status": "pass",
+      "returncode": 0,
+      "duration": 45.09363,
+      "stdout": "rmat, explaining complex topics clearly\n\n[OK] Using provider: openai\n\nEnter episode topic: Choose tone (casual/professional/educational) [educational]: Choose voice (alloy/echo/fable/onyx/nova/shimmer) [alloy]: Choose length (short/medium/long) [medium]: \n[OK] Episode directory: output\\Renewable_Energy_Future_2026-04-08_150458\n[OK] Template: Solo Explainer\n\nGenerating Solo Explainer script...\n[OK] Script generated using Solo Explainer template\n\nGenerating show notes...\n[OK] Show notes generated\n\nGenerating audio...\n[OK] Audio generated\n[OK] Metadata saved\n\n======================================================================\nStep 27 Complete: Template-Based Podcast\n======================================================================\n\nEpisode ID: Renewable_Energy_Future_2026-04-08_150458\nTemplate: Solo Explainer\nLocation: output\\Renewable_Energy_Future_2026-04-08_150458\n\nGenerated files:\n  - script.txt (Solo Explainer format)\n  - show_notes.txt\n  - podcast_nova.mp3\n  - metadata.json\n",
+      "stderr": null,
+      "step": "27",
+      "name": "Podcast Templates",
+      "file": "step27_podcast_templates.py"
+    },
+    {
+      "status": "pass",
+      "returncode": 0,
+      "duration": 36.290505,
+      "stdout": "0544\n[OK] Characters: 2\n\nGenerating 2-character script...\n[OK] Multi-character script generated\n\nDetecting characters in script...\n[OK] Found 2 characters: GUEST, HOST\n\n[OK] Voice assignments:\n    GUEST: alloy\n    HOST: echo\n\nGenerating show notes...\n[OK] Show notes generated\n\nGenerating audio...\n[INFO] Note: Multi-voice rendering will be implemented in Step 35\n[INFO] Using single voice for now\n[OK] Audio generated (voice: echo)\n[OK] Metadata saved\n\n======================================================================\nStep 28 Complete: Multi-Character Podcast\n======================================================================\n\nEpisode ID: Climate_Change_Solutions_2026-04-08_150544\nCharacters: 2 (GUEST, HOST)\nLocation: output\\Climate_Change_Solutions_2026-04-08_150544\n\nGenerated files:\n  - script.txt (multi-character dialogue)\n  - voice_assignments.txt\n  - show_notes.txt\n  - podcast_multi_character.mp3\n  - metadata.json\n\nNote: Full multi-voice rendering will be available in Step 35\n",
+      "stderr": null,
+      "step": "28",
+      "name": "Multi-Character Podcast",
+      "file": "step28_multi_character_podcast.py"
+    },
+    {
+      "status": "pass",
+      "returncode": 0,
+      "duration": 25.300879,
+      "stdout": "hen done):\n\n[OK] Loaded 1 source(s)\nChoose tone (casual/professional/educational) [educational]: Choose voice (alloy/echo/fable/onyx/nova/shimmer) [alloy]: Choose length (short/medium/long) [medium]: \n[OK] Episode directory: output\\Space_Exploration_2026-04-08_150621\n[OK] Grounding mode: balanced\n[OK] Saved 1 source file(s)\n\nGenerating script with BALANCED grounding...\n[OK] Grounded script generated\n\nGenerating show notes...\n[OK] Show notes generated\n\nGenerating audio...\n[OK] Audio generated\n[OK] Metadata saved\n\n======================================================================\nStep 29 Complete: Grounded Podcast\n======================================================================\n\nEpisode ID: Space_Exploration_2026-04-08_150621\nGrounding mode: BALANCED\nSources: 1\nLocation: output\\Space_Exploration_2026-04-08_150621\n\nGenerated files:\n  - sources/ (source material)\n  - script.txt (grounded in sources)\n  - grounding_info.txt\n  - show_notes.txt\n  - podcast_nova.mp3\n  - metadata.json\n",
+      "stderr": null,
+      "step": "29",
+      "name": "Grounding Rules",
+      "file": "step29_grounding_rules.py"
+    },
+    {
+      "status": "fail",
+      "returncode": 1,
+      "duration": 4.348891,
+      "stdout": "act2_exploration: Deep dive and analysis (35%)\n     - act3_implications: Implications and future (20%)\n     - conclusion: Wrap-up and key takeaways (10%)\n\n3. News Format\n   Segments: 5\n     - headlines: Quick overview of topics (10%)\n     - story1: First main story (30%)\n     - story2: Second main story (30%)\n     - story3: Third main story (20%)\n     - closing: Recap and sign-off (10%)\n\n4. Educational Deep Dive\n   Segments: 5\n     - intro: What we'll learn today (10%)\n     - fundamentals: Core concepts (25%)\n     - examples: Real-world examples (25%)\n     - advanced: Advanced topics or implications (25%)\n     - summary: Review and next steps (15%)\n======================================================================\n\nChoose structure (1-4, default 1): \n[OK] Selected: Basic (Intro + Body + Conclusion)\n\nEnter episode topic: Choose tone (casual/professional/educational) [educational]: Choose voice (alloy/echo/fable/onyx/nova/shimmer) [alloy]: Choose length (short/medium/long) [medium]: ",
+      "stderr": "Traceback (most recent call last):\n  File \"C:\\Users\\ge000m\\OneDrive - NRG Energy, Inc\\Alex\\Hackthon\\04 2026\\podcast_creator_agent\\step30_segment_aware_generation.py\", line 355, in <module>\n    main()\n  File \"C:\\Users\\ge000m\\OneDrive - NRG Energy, Inc\\Alex\\Hackthon\\04 2026\\podcast_creator_agent\\step30_segment_aware_generation.py\", line 219, in main\n    target_words = (word_range[0] + word_range[1]) // 2\n                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^~~\nTypeError: unsupported operand type(s) for //: 'str' and 'int'\n",
+      "step": "30",
+      "name": "Segment-Aware Generation",
+      "file": "step30_segment_aware_generation.py"
+    },
+    {
+      "status": "fail",
+      "returncode": 1,
+      "duration": 4.093885,
+      "stdout": "\n======================================================================\nStep 31: Citation / Source Trace Support\n======================================================================\n\n[OK] Using provider: openai\n\n======================================================================\nCitation Styles\n======================================================================\n\n1. INLINE - [Source 1] style citations in text\n2. FOOTNOTE - Superscript numbers^1 with footnote list\n3. SECTION - Group content by source\n4. ATTRIBUTED - Natural attribution without explicit numbers\n======================================================================\n\nChoose citation style (1-4, default 1): \n[OK] Citation style: INLINE\n\nEnter episode topic: \nProvide sources (minimum 2 recommended for citations):\nEnter source content. Type 'DONE' when finished.\n\n--- Source 1 ---\nPaste content (or type DONE to finish):\n[OK] Source 1 added\n\n--- Source 2 ---\nPaste content (or type DONE to finish):\n",
+      "stderr": "Traceback (most recent call last):\n  File \"C:\\Users\\ge000m\\OneDrive - NRG Energy, Inc\\Alex\\Hackthon\\04 2026\\podcast_creator_agent\\step31_citation_support.py\", line 396, in <module>\n    main()\n  File \"C:\\Users\\ge000m\\OneDrive - NRG Energy, Inc\\Alex\\Hackthon\\04 2026\\podcast_creator_agent\\step31_citation_support.py\", line 195, in main\n    line = input()\n           ^^^^^^^\nEOFError: EOF when reading a line\n",
+      "step": "31",
+      "name": "Citation Support",
+      "file": "step31_citation_support.py"
+    },
+    {
+      "status": "pass",
+      "returncode": 0,
+      "duration": 56.174214,
+      "stdout": ": Choose length (short/medium/long) [medium]: \n[OK] Episode directory: output\\Future_of_Technology_2026-04-08_150654\n[OK] Persona: Alex the Tech Enthusiast\n[OK] Voice: nova\n[OK] Persona profile saved\n\nGenerating script as Alex the Tech Enthusiast...\n[OK] Script generated in Alex the Tech Enthusiast's voice\n\nGenerating show notes...\n[OK] Show notes generated\n\nGenerating audio as Alex the Tech Enthusiast...\n[OK] Audio generated\n[OK] Metadata saved\n\n======================================================================\nStep 32 Complete: Persona-Based Podcast\n======================================================================\n\nEpisode ID: Future_of_Technology_2026-04-08_150654\nHost: Alex the Tech Enthusiast\nPersonality: Energetic, curious, excited about new technology\nVoice: nova\nLocation: output\\Future_of_Technology_2026-04-08_150654\n\nGenerated files:\n  - persona_profile.json\n  - script.txt (in Alex the Tech Enthusiast's voice)\n  - show_notes.txt\n  - podcast_nova.mp3\n  - metadata.json\n",
+      "stderr": null,
+      "step": "32",
+      "name": "Voice Persona System",
+      "file": "step32_voice_persona_system.py"
+    },
+    {
+      "status": "fail",
+      "returncode": 1,
+      "duration": 1.718403,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"C:\\Users\\ge000m\\OneDrive - NRG Energy, Inc\\Alex\\Hackthon\\04 2026\\podcast_creator_agent\\step33_audio_chunking.py\", line 79, in <module>\n    ) -> Tuple[List[Path], Dict]:\n                           ^^^^\nNameError: name 'Dict' is not defined. Did you mean: 'dict'?\n",
+      "step": "33",
+      "name": "Audio Chunking",
+      "file": "step33_audio_chunking.py"
+    },
+    {
+      "status": "pass",
+      "returncode": 0,
+      "duration": 42.848873,
+      "stdout": "intro + content + outro)...\n[INFO] Generating intro audio...\n[OK] Intro generated\n[INFO] Generating main content audio...\n[OK] Main content generated\n[INFO] Generating outro audio...\n[OK] Outro generated\n\n[INFO] Combining intro + content + outro...\n[WARN] pydub not available. Individual segments saved.\n[INFO] Install pydub for automatic combining: pip install pydub\n\nGenerating show notes...\n[OK] Show notes generated\n[OK] Metadata saved\n\n======================================================================\nStep 34 Complete: Branded Podcast\n======================================================================\n\nEpisode ID: 1_2026-04-08_150753\nBranding: tech\nLocation: output\\1_2026-04-08_150753\n\nGenerated files:\n  - branding_scripts.txt (intro & outro text)\n  - script.txt (full script with branding)\n  - branding/intro.mp3\n  - branding/main_content.mp3\n  - branding/outro.mp3\n  - show_notes.txt\n  - metadata.json\n\n[INFO] Install pydub for automatic audio combining:\n       pip install pydub\n",
+      "stderr": null,
+      "step": "34",
+      "name": "Intro/Outro Branding",
+      "file": "step34_intro_outro_branding.py"
+    },
+    {
+      "status": "fail",
+      "returncode": 1,
+      "duration": 11.42079,
+      "stdout": "\n======================================================================\nStep 35: Multi-Voice Rendering\n======================================================================\n\n[OK] Using provider: openai\n[OK] Available voices: alloy, echo, fable, onyx, nova, shimmer\n\nEnter episode topic: Number of speakers (2-4, default 2): Choose tone (casual/professional/educational) [educational]: Choose length (short/medium/long) [medium]: \nManually assign voices? (y/n, default n): \n[OK] Episode directory: output\\AI_Panel_Discussion_2026-04-08_150835\n[OK] Speakers: 2\n\nGenerating 2-speaker script...\n[OK] Multi-speaker script generated\n\nDetecting speakers...\n[OK] Found 2 speakers: GUEST, HOST\n\nAssigning voices to speakers...\n\n[OK] Voice assignments:\n",
+      "stderr": "Traceback (most recent call last):\n  File \"C:\\Users\\ge000m\\OneDrive - NRG Energy, Inc\\Alex\\Hackthon\\04 2026\\podcast_creator_agent\\step35_multi_voice_rendering.py\", line 449, in <module>\n    main()\n  File \"C:\\Users\\ge000m\\OneDrive - NRG Energy, Inc\\Alex\\Hackthon\\04 2026\\podcast_creator_agent\\step35_multi_voice_rendering.py\", line 316, in main\n    print(f\"    {speaker} \\u2192 {voice}\")\n  File \"C:\\Users\\ge000m\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\encodings\\cp1252.py\", line 19, in encode\n    return codecs.charmap_encode(input,self.errors,encoding_table)[0]\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nUnicodeEncodeError: 'charmap' codec can't encode character '\\u2192' in position 10: character maps to <undefined>\n",
+      "step": "35",
+      "name": "Multi-Voice Rendering",
+      "file": "step35_multi_voice_rendering.py"
+    },
+    {
+      "status": "pass",
+      "returncode": 0,
+      "duration": 70.643101,
+      "stdout": "ssionally_Processed_Podcast_2026-04-08_150848\n[OK] Processing preset: Standard Podcast\n\nGenerating script...\n[OK] Script generated\n\nGenerating raw audio...\n[OK] Raw audio generated\n\nAnalyzing raw audio...\n[WARN] Audio analysis failed: No module named 'pydub'\n\nApplying post-processing...\n[ERROR] pydub not available\n[INFO] Install with: pip install pydub\n[OK] Processing info saved\n\nGenerating show notes...\n[OK] Show notes generated\n[OK] Metadata saved\n\n======================================================================\nStep 36 Complete: Post-Processed Podcast\n======================================================================\n\nEpisode ID: Professionally_Processed_Podcast_2026-04-08_150848\nProcessing: Standard Podcast\nLocation: output\\Professionally_Processed_Podcast_2026-04-08_150848\n\nGenerated files:\n  - script.txt\n  - podcast_alloy_raw.mp3 (original)\n  - processing_info.json\n  - show_notes.txt\n  - metadata.json\n\n[INFO] Install pydub for audio processing:\n       pip install pydub\n",
+      "stderr": null,
+      "step": "36",
+      "name": "Audio Post-Processing",
+      "file": "step36_audio_post_processing.py"
+    },
+    {
+      "status": "pass",
+      "returncode": 0,
+      "duration": 2.771448,
+      "stdout": "========\nAutomation Profiles\n======================================================================\n\n1. Daily Briefing\n   Automated daily news/updates podcast\n   Frequency: daily\n   Settings: professional, nova, short\n\n2. Weekly Deep Dive\n   Automated weekly in-depth analysis\n   Frequency: weekly\n   Settings: educational, onyx, long\n\n3. Trending Topics\n   Automated podcast on trending subjects\n   Frequency: as_needed\n   Settings: casual, echo, medium\n======================================================================\n\nChoose profile (1-3, default 1): \n[OK] Selected: Daily Briefing\n\nEnter episode topic (or press Enter for auto-suggested topic): \nStarting automated generation...\n\n======================================================================\nAutomated Episode Generation: Daily Briefing\n======================================================================\n[OK] Provider: openai\n\n[ERROR] Automated generation failed: validate_choice() got an unexpected keyword argument 'default'\n",
+      "stderr": null,
+      "step": "37",
+      "name": "Automated Generation",
+      "file": "step37_automated_generation.py"
+    },
+    {
+      "status": "pass",
+      "returncode": 0,
+      "duration": 2.283601,
+      "stdout": "========================================\nStep 38: Topic Queue\n======================================================================\n\n======================================================================\nTopic Queue Menu\n======================================================================\n1. View queue\n2. Add topic\n3. Process next topic\n4. Process batch (multiple topics)\n5. Remove topic\n6. Update priority\n7. Add demo topics\n8. Exit\n======================================================================\n\nChoice (1-8): \n[INFO] Adding demo topics...\n[OK] Added 5 demo topics\n\n======================================================================\nTopic Queue Menu\n======================================================================\n1. View queue\n2. Add topic\n3. Process next topic\n4. Process batch (multiple topics)\n5. Remove topic\n6. Update priority\n7. Add demo topics\n8. Exit\n======================================================================\n\nChoice (1-8): \n[OK] Exiting queue manager\n",
+      "stderr": null,
+      "step": "38",
+      "name": "Topic Queue",
+      "file": "step38_topic_queue.py"
+    },
+    {
+      "status": "fail",
+      "returncode": 1,
+      "duration": 2.937226,
+      "stdout": "\n======================================================================\nStep 39: Source Selection Agent\n======================================================================\n",
+      "stderr": "Traceback (most recent call last):\n  File \"C:\\Users\\ge000m\\OneDrive - NRG Energy, Inc\\Alex\\Hackthon\\04 2026\\podcast_creator_agent\\step39_source_selection_agent.py\", line 287, in <module>\n    main()\n  File \"C:\\Users\\ge000m\\OneDrive - NRG Energy, Inc\\Alex\\Hackthon\\04 2026\\podcast_creator_agent\\step39_source_selection_agent.py\", line 184, in main\n    provider_config = ProviderConfig(llm_provider=provider_name)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: ProviderConfig.__init__() missing 1 required positional argument: 'tts_provider'\n",
+      "step": "39",
+      "name": "Source Selection Agent",
+      "file": "step39_source_selection_agent.py"
+    },
+    {
+      "status": "pass",
+      "returncode": 0,
+      "duration": 115.641925,
+      "stdout": " the digital world. Today, we\u2019ll break down exactly what blockchain is, how it works, and why it could affect every part of your life.\u201d\n\n\nActions: (a)pprove, (r)evise, (c)ancel? [OK] Summary approved\n\n======================================================================\nSTAGE 2: Generating Full Script from Summary\n======================================================================\n[OK] Full script generated (7593 chars)\n\nGenerating show notes...\n[OK] Show notes generated\n\nGenerating audio...\n[OK] Audio generated\n[OK] Metadata saved\n\n======================================================================\nStep 40 Complete: Two-Stage Podcast\n======================================================================\n\nEpisode ID: Blockchain_Fundamentals_2026-04-08_151006\nMethod: Two-stage generation\nLocation: output\\Blockchain_Fundamentals_2026-04-08_151006\n\nGenerated files:\n  - content_summary.txt (Stage 1)\n  - script.txt (Stage 2)\n  - show_notes.txt\n  - podcast_fable.mp3\n  - metadata.json\n",
+      "stderr": null,
+      "step": "40",
+      "name": "Summarize First",
+      "file": "step40_summarize_first.py"
+    },
+    {
+      "status": "fail",
+      "returncode": 1,
+      "duration": 2.113032,
+      "stdout": "\n======================================================================\nStep 41: Quality Check Pass\n======================================================================\n",
+      "stderr": "Traceback (most recent call last):\n  File \"C:\\Users\\ge000m\\OneDrive - NRG Energy, Inc\\Alex\\Hackthon\\04 2026\\podcast_creator_agent\\step41_quality_check.py\", line 428, in <module>\n    main()\n  File \"C:\\Users\\ge000m\\OneDrive - NRG Energy, Inc\\Alex\\Hackthon\\04 2026\\podcast_creator_agent\\step41_quality_check.py\", line 254, in main\n    provider_config = ProviderConfig(llm_provider=provider_name)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: ProviderConfig.__init__() missing 1 required positional argument: 'tts_provider'\n",
+      "step": "41",
+      "name": "Quality Check",
+      "file": "step41_quality_check.py"
+    },
+    {
+      "status": "pass",
+      "returncode": 0,
+      "duration": 2.065226,
+      "stdout": "\n======================================================================\nStep 42: Episode Approval Workflow\n======================================================================\n\n[OK] Approval workflow initialized\n\n======================================================================\nApproval Workflow Menu\n======================================================================\n1. Register new episode\n2. View episode status\n3. Submit for review\n4. Run quality check\n5. Approve episode\n6. Reject episode\n7. List pending reviews\n8. Publish episode\n9. Exit\n======================================================================\n\nChoice (1-9): \n[OK] Exiting approval workflow\n",
+      "stderr": null,
+      "step": "42",
+      "name": "Approval Workflow",
+      "file": "step42_approval_workflow.py"
+    }
+  ]
+}

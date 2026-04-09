@@ -1,0 +1,21 @@
+{
+  "timestamp": "2026-04-08T15:57:57.371773",
+  "results": {
+    "43": "SKIP (interactive)",
+    "44": "MANUAL TEST REQUIRED",
+    "45": "PASS",
+    "46": "DOCS ONLY",
+    "47": "FAIL",
+    "48": "FAIL",
+    "49": "FAIL",
+    "50": "FAIL",
+    "51": "FAIL",
+    "52": "DOCS ONLY",
+    "53": "FAIL"
+  },
+  "summary": {
+    "passed": 1,
+    "failed": 6,
+    "total": 11
+  }
+}

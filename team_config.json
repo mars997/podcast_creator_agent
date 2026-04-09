@@ -1,0 +1,38 @@
+{
+  "team_name": "Podcast Production Team",
+  "created_at": "2026-04-08T15:57:54.826456",
+  "version": "1.0",
+  "defaults": {
+    "tone": "professional",
+    "length": "medium",
+    "voice": "nova",
+    "provider": "openai"
+  },
+  "personas_enabled": [
+    "tech_enthusiast",
+    "science_explainer",
+    "business_analyst"
+  ],
+  "templates_enabled": [
+    "solo_explainer",
+    "news_recap",
+    "deep_dive"
+  ],
+  "quality_standards": {
+    "min_word_count": 300,
+    "max_word_count": 1500,
+    "require_sources": false,
+    "require_approval": true
+  },
+  "output_settings": {
+    "output_root": "output",
+    "naming_convention": "{topic}_{timestamp}",
+    "save_sources": true,
+    "save_metadata": true
+  },
+  "branding": {
+    "show_name": "AI Insights Podcast",
+    "intro_template": "tech",
+    "outro_template": "tech"
+  }
+}
