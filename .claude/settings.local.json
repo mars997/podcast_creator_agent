@@ -27,7 +27,31 @@
       "Bash(ls -la /c/Users/WTHickman/repos/podcast_creator_agent/*.md /c/Users/WTHickman/repos/podcast_creator_agent/docs/)",
       "Bash(pip freeze:*)",
       "Bash(pip list:*)",
-      "Bash(ls -la *.txt)"
+      "Bash(ls -la *.txt)",
+      "Bash(pip --version)",
+      "Bash(python -c \"import streamlit, openai, feedparser, pypdf, youtube_transcript_api, dotenv, requests, bs4; print\\('All core imports OK'\\)\")",
+      "Bash(python -c \"import sys; print\\(sys.executable\\)\")",
+      "Bash(\"c:/Users/alexg/anaconda3/envs/transcribe/python.exe\" -c \"import openai; print\\('openai OK', openai.__version__\\)\")",
+      "Bash(\"c:/Users/alexg/anaconda3/python.exe\" -c \"import sys; print\\(sys.version\\)\")",
+      "Bash(\"c:/Users/alexg/anaconda3/python.exe\" -m pip install openai python-dotenv feedparser \"youtube-transcript-api\" streamlit \"pypdf>=4.0.0,<5.0.0\" beautifulsoup4 requests pytest pytest-cov pytest-mock)",
+      "Bash(\"c:/Users/alexg/anaconda3/envs/transcribe/python.exe\" --version)",
+      "Bash(\"c:/Users/alexg/anaconda3/envs/transcribe/python.exe\" -c \"import streamlit, openai, feedparser, pypdf, youtube_transcript_api, dotenv, requests, bs4; print\\('All core imports OK'\\)\")",
+      "Bash(c:/Users/alexg/anaconda3/envs/transcribe/python.exe -c ':*)",
+      "Bash(\"c:/Users/alexg/anaconda3/envs/transcribe/python.exe\" -c \"import youtube_transcript_api; help\\(youtube_transcript_api.YouTubeTranscriptApi\\)\")",
+      "Bash(\"c:/Users/alexg/anaconda3/envs/transcribe/python.exe\" -m pip install elevenlabs)",
+      "Bash(\"c:/Users/alexg/anaconda3/envs/transcribe/python.exe\" -m pip install pydub)",
+      "Bash(conda install:*)",
+      "Bash(\"c:/Users/alexg/anaconda3/envs/transcribe/python.exe\" -c \"import subprocess; r = subprocess.run\\(['ffmpeg', '-version'], capture_output=True, text=True\\); print\\(r.stdout[:100] if r.returncode==0 else 'not found'\\)\")",
+      "Bash(c:/Users/alexg/anaconda3/envs/transcribe/python.exe -c \"from elevenlabs.client import ElevenLabs; print\\('OK:', ElevenLabs\\)\")",
+      "Bash(where streamlit:*)",
+      "Bash(c:/Users/alexg/podcast_creator_agent/.venv/Scripts/python.exe -c \"from elevenlabs.client import ElevenLabs; print\\('OK'\\)\")",
+      "Bash(c:/Users/alexg/podcast_creator_agent/.venv/Scripts/python.exe -m pip install elevenlabs)",
+      "Bash(c:/Users/alexg/podcast_creator_agent/.venv/Scripts/python.exe -c ':*)",
+      "Bash(rm -f c:/Users/alexg/podcast_creator_agent/providers/__pycache__/*.pyc)",
+      "Bash(rm -f c:/Users/alexg/podcast_creator_agent/core/__pycache__/*.pyc)",
+      "Bash(c:/Users/alexg/podcast_creator_agent/.venv/Scripts/python.exe -c \"import sys; print\\(sys.executable\\)\")",
+      "Bash(c:/Users/alexg/podcast_creator_agent/.venv/Scripts/python.exe -m streamlit --version)",
+      "Bash(c:/Users/alexg/podcast_creator_agent/.venv/Scripts/python.exe -m pip install streamlit)"
     ]
   }
 }

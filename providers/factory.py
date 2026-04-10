@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 from .base import BaseLLMProvider, BaseTTSProvider
 from .gemini_provider import GeminiLLMProvider, GeminiTTSProvider
 from .openai_provider import OpenAILLMProvider, OpenAITTSProvider
+from .elevenlabs_provider import ElevenLabsTTSProvider
 
 # Load environment variables
 load_dotenv()
@@ -42,6 +43,9 @@ def detect_available_providers() -> dict:
 
     if os.getenv("GOOGLE_API_KEY"):
         available["gemini"] = True
+
+    if os.getenv("ELEVENLABS_API_KEY"):
+        available["elevenlabs"] = True
 
     return available
 
@@ -87,10 +91,12 @@ def create_tts_provider(config: ProviderConfig) -> BaseTTSProvider:
         return OpenAITTSProvider(model=config.tts_model or "gpt-4o-mini-tts")
     elif config.tts_provider == "gemini":
         return GeminiTTSProvider(model=config.tts_model or "gemini-2.5-flash")
+    elif config.tts_provider == "elevenlabs":
+        return ElevenLabsTTSProvider()
     else:
         raise ValueError(
             f"Unknown TTS provider: {config.tts_provider}\n"
-            f"Supported providers: openai, gemini"
+            f"Supported providers: openai, gemini, elevenlabs"
         )
 
 

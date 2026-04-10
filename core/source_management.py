@@ -234,16 +234,14 @@ def fetch_youtube_transcript(youtube_url: str, languages: List[str] = None) -> s
         raise ValueError(f"Could not extract video ID from URL: {youtube_url}")
 
     try:
-        # Fetch transcript
-        transcript_list = YouTubeTranscriptApi.get_transcript(
-            video_id,
-            languages=languages
-        )
+        # Fetch transcript (v1.x API: instantiate then call fetch())
+        api = YouTubeTranscriptApi()
+        transcript_list = api.fetch(video_id, languages=languages)
 
         # Combine all transcript segments
         full_text = []
         for segment in transcript_list:
-            text = segment['text'].strip()
+            text = segment.text.strip()
             if text:
                 full_text.append(text)
 

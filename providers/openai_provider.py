@@ -111,9 +111,8 @@ class OpenAITTSProvider(BaseTTSProvider):
             **kwargs: Additional parameters (ignored for compatibility)
         """
         if voice not in self.VALID_VOICES:
-            raise ValueError(
-                f"Invalid voice '{voice}'. Must be one of: {', '.join(self.VALID_VOICES)}"
-            )
+            print(f"[WARNING] Voice '{voice}' is not a valid OpenAI voice. Falling back to 'nova'.")
+            voice = "nova"
 
         # Clamp speed to valid range
         speed = max(0.25, min(4.0, speed))

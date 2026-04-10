@@ -55,6 +55,15 @@ def main():
     st.title("🎙️ AI Podcast Creator v2")
     st.markdown("**5 Generation Modes** | Unified Source Material Hub | Professional AI-powered podcast production")
 
+    # Fetch ElevenLabs voices once per session and cache in session_state
+    if "el_voices_loaded" not in st.session_state:
+        _vlist, _verr = _fetch_elevenlabs_voices()
+        st.session_state["_el_voices"] = _vlist
+        st.session_state["_el_voices_error"] = _verr
+        st.session_state["el_voices_loaded"] = True
+
+    _SESSION_EL_VOICES = st.session_state.get("_el_voices", [])
+
     # Sidebar - Global Configuration
     with st.sidebar:
         st.header("⚙️ Global Settings")
@@ -275,34 +284,48 @@ We'll transform this into an engaging podcast.""",
 
         st.divider()
 
-        # ===== SECTION D: UPLOAD AUDIO =====
-        st.subheader("🎙️ Section D: Upload Audio")
-        st.caption("Upload audio to transcribe or create a voice-cloned persona")
+        # ===== SECTION D: SELECT PERSONA =====
+        st.subheader("🎙️ Section D: Select Persona (Optional)")
+        st.caption("Apply a voice persona to narrate the generated podcast")
 
-        audio_file = st.file_uploader(
-            "Upload audio file",
-            type=["mp3", "wav", "m4a", "ogg", "webm"],
-            help="Supported: MP3, WAV, M4A, OGG, WEBM",
-            key="source_audio_upload"
+        # Build persona options from ElevenLabs voices + created personas
+        from core.created_personas import load_created_personas as _load_created_personas
+        _src_el_voices = _SESSION_EL_VOICES
+        _src_created_personas = _load_created_personas()
+
+        _src_persona_options = {"— None (default voice) —": None}
+
+        for _v in _src_el_voices:
+            _badge = "🎙️" if _v["category"] == "cloned" else "🔊"
+            _label = f"{_badge} {_v['name']} ({_v['category']})"
+            _src_persona_options[_label] = ("el", _v["id"], _v)
+
+        for _cp in _src_created_personas:
+            _OPENAI_VOICES = {"alloy", "echo", "fable", "onyx", "nova", "shimmer", "coqui_cloned"}
+            _is_el = _cp.preferred_tts_voice and _cp.preferred_tts_voice not in _OPENAI_VOICES
+            _badge = "🎤" if _is_el else "💾"
+            _label = f"{_badge} {_cp.persona_name} (created)"
+            _src_persona_options[_label] = ("created", _cp.persona_id, _cp)
+
+        _src_selected_label = st.selectbox(
+            "Persona / Voice",
+            options=list(_src_persona_options.keys()),
+            key="source_persona_select"
         )
+        _src_selected = _src_persona_options[_src_selected_label]
 
-        audio_purpose = None
-        if audio_file:
-            st.audio(audio_file, format=f'audio/{audio_file.name.split(".")[-1]}')
-
-            audio_purpose = st.radio(
-                "What would you like to do with this audio?",
-                [
-                    "📝 Transcribe as source material",
-                    "🎤 Clone voice & create persona (then use in podcast)"
-                ],
-                help="Choose whether to transcribe the audio content or clone the voice for persona creation",
-                key="audio_purpose_radio"
-            )
-
-            if "Clone voice" in audio_purpose:
-                st.info("🎤 **Voice Cloning:** We'll attempt to clone the voice from this audio. If network blocks it, we'll fall back to style analysis.")
-                st.info("💡 **Better option:** Go to **Persona Mode** tab → **✨ Create New** → **📤 Upload Audio** for the full persona creation interface.")
+        # Show brief details for the selected persona
+        if _src_selected:
+            _src_kind, _src_id, _src_data = _src_selected
+            if _src_kind == "el":
+                with st.expander("Voice details", expanded=False):
+                    st.markdown(f"**{_src_data['name']}** — {_src_data['category']}")
+                    if _src_data.get("description"):
+                        st.caption(_src_data["description"])
+            elif _src_kind == "created":
+                with st.expander("Persona details", expanded=False):
+                    st.markdown(f"**{_src_data.persona_name}** — {_src_data.voice_archetype}")
+                    st.caption(_src_data.persona_description)
 
         st.divider()
 
@@ -379,26 +402,17 @@ We'll transform this into an engaging podcast.""",
                     except Exception as e:
                         st.error(f"Error fetching {url}: {e}")
 
-            # Process audio (only if transcription mode selected)
-            if audio_file and audio_purpose and "Transcribe" in audio_purpose:
-                try:
-                    # Save temp audio file
-                    temp_audio = Path(f"temp_audio.{audio_file.name.split('.')[-1]}")
-                    with open(temp_audio, 'wb') as f:
-                        f.write(audio_file.getvalue())
-
-                    # Transcribe audio for source material
-                    with st.spinner("🎤 Transcribing audio..."):
-                        transcript = transcribe_audio(temp_audio)
-                        combined_source += f"{transcript}\n\n"
-                        st.success("✅ Audio transcribed")
-
-                    temp_audio.unlink()
-
-                except Exception as e:
-                    st.error(f"Error processing audio: {e}")
-                    import traceback
-                    st.code(traceback.format_exc())
+            # Resolve persona voice from Section D selection
+            matched_voice = None
+            if _src_selected:
+                _gen_kind, _gen_id, _gen_data = _src_selected
+                if _gen_kind == "el":
+                    matched_voice = _gen_id
+                elif _gen_kind == "created":
+                    _OPENAI_SET = {"alloy", "echo", "fable", "onyx", "nova", "shimmer", "coqui_cloned"}
+                    _v = _gen_data.preferred_tts_voice
+                    if _v and _v not in _OPENAI_SET:
+                        matched_voice = _v  # ElevenLabs voice_id from created persona
 
             # Validate
             if not combined_source or len(combined_source) < 100:
@@ -416,7 +430,8 @@ We'll transform this into an engaging podcast.""",
                     add_commentary=add_commentary,
                     tone=tone,
                     length=length,
-                    voice_provider=provider_name
+                    voice_provider=provider_name,
+                    preferred_voice=matched_voice,
                 )
 
                 # Generate
@@ -557,6 +572,12 @@ We'll transform this into an engaging podcast.""",
         from core.created_personas import load_created_personas
         created_personas = load_created_personas()
 
+        # Use ElevenLabs voices fetched once at startup
+        el_voices = _SESSION_EL_VOICES
+        _el_fetch_error = st.session_state.get("_el_voices_error", "")
+        if _el_fetch_error:
+            st.warning(f"ElevenLabs voices unavailable: {_el_fetch_error}")
+
         # Categorize personas (built-in)
         persona_categories = {
             "🎓 Informative & Educational": [
@@ -574,6 +595,10 @@ We'll transform this into an engaging podcast.""",
             ]
         }
 
+        # Add ElevenLabs voices category
+        if el_voices:
+            persona_categories["🎤 ElevenLabs Voices"] = [f"el__{v['id']}" for v in el_voices]
+
         # Add created personas category if any exist
         if created_personas:
             persona_categories["💾 Your Created Personas"] = [p.persona_id for p in created_personas]
@@ -586,9 +611,19 @@ We'll transform this into an engaging podcast.""",
 
         # Build display names
         persona_display_names = {}
+        # Build a quick lookup for ElevenLabs voices by id
+        el_voice_lookup = {v["id"]: v for v in el_voices}
         for key in persona_keys:
             if key == "create_your_own":
                 persona_display_names[key] = "➕ Create Your Own"
+            elif key.startswith("el__"):
+                # ElevenLabs account voice
+                voice_id = key[4:]
+                v = el_voice_lookup.get(voice_id, {})
+                name = v.get("name", voice_id)
+                category = v.get("category", "premade")
+                badge = "🎙️" if category == "cloned" else "🔊"
+                persona_display_names[key] = f"{badge} {name} ({category})"
             elif key.startswith("created_") or key.startswith("cloned_"):
                 # Created or cloned persona
                 cp = next((p for p in created_personas if p.persona_id == key), None)
@@ -610,7 +645,8 @@ We'll transform this into an engaging podcast.""",
         # Reverse lookup
         persona_key = [k for k, v in persona_display_names.items() if v == selected_display][0]
 
-        # Check if it's a created persona
+        # Check what type of persona is selected
+        is_el_voice = persona_key.startswith("el__")
         is_created_persona = persona_key.startswith("created_") or persona_key.startswith("cloned_")
         selected_created_persona = None
 
@@ -624,13 +660,51 @@ We'll transform this into an engaging podcast.""",
         creation_method = "📤 Upload Audio (Analyze Speaking Style)"  # Default
 
         # Show persona details or custom creation
-        if is_created_persona and selected_created_persona:
-            # Display created persona
-            is_voice_cloned = selected_created_persona.preferred_tts_voice == "coqui_cloned"
+        if is_el_voice:
+            # ElevenLabs account voice selected
+            voice_id = persona_key[4:]
+            v_info = el_voice_lookup.get(voice_id, {})
+            with st.expander("🎙️ ElevenLabs Voice Details", expanded=True):
+                st.success(f"**{v_info.get('name', voice_id)}** — will use this voice for audio generation")
+                st.markdown(f"- **Category:** {v_info.get('category', 'premade')}")
+                if v_info.get("description"):
+                    st.markdown(f"- **Description:** {v_info['description']}")
+
+            persona_topic = st.text_input(
+                "Podcast Topic *",
+                placeholder="e.g., The History of Space Exploration",
+                key="persona_topic"
+            )
+            fun_vs_serious = st.slider(
+                "Fun ↔ Serious Balance",
+                0.0, 1.0, 0.5,
+                help="0 = Maximum fun/entertainment | 1 = Maximum serious/informative"
+            )
+
+        elif is_created_persona and selected_created_persona:
+            # Display created persona — detect ElevenLabs clones too
+            _STANDARD_VOICES = {"alloy", "echo", "fable", "onyx", "nova", "shimmer", "coqui_cloned", ""}
+            is_voice_cloned = (selected_created_persona.preferred_tts_voice not in _STANDARD_VOICES
+                               and selected_created_persona.preferred_tts_voice is not None)
 
             with st.expander("📖 Created Persona Details", expanded=True):
                 if is_voice_cloned:
-                    st.info("🎤 **Voice Cloned Persona** - This persona uses voice cloning technology")
+                    voice_id = selected_created_persona.preferred_tts_voice
+                    voice_status = _check_elevenlabs_voice_status(voice_id)
+
+                    if voice_status == "ready":
+                        st.success("🎤 **Voice Cloned Persona** — voice is active and will be used for generation!")
+                    elif voice_status == "blocked":
+                        st.error("🚫 **ElevenLabs rejected this voice sample** (`detected_captcha_voice`)")
+                        st.markdown(
+                            "ElevenLabs' AI detected the uploaded audio as a synthetic or heavily-processed voice "
+                            "and will not clone it. This is a platform-level content policy.\n\n"
+                            "**To fix:** delete this persona and re-upload a **plain voice recording** — "
+                            "just you talking naturally, no music, no effects, no auto-tune, quiet room.\n\n"
+                            "**Until then:** podcasts will still generate using OpenAI **nova** voice as fallback."
+                        )
+                    else:
+                        st.warning("🎤 Voice Cloned Persona — could not check voice status.")
 
                 col1, col2 = st.columns(2)
                 with col1:
@@ -644,7 +718,7 @@ We'll transform this into an engaging podcast.""",
                     if not is_voice_cloned:
                         st.markdown(f"- **Tone:** {selected_created_persona.tone.capitalize()}")
                         st.markdown(f"- **Archetype:** {selected_created_persona.voice_archetype}")
-                    st.markdown(f"- **TTS Voice:** {'Voice Cloned' if is_voice_cloned else selected_created_persona.preferred_tts_voice}")
+                    st.markdown(f"- **TTS Voice:** {'Voice Cloned (ElevenLabs)' if is_voice_cloned else selected_created_persona.preferred_tts_voice}")
                     st.caption(f"📅 Created: {selected_created_persona.created_at[:10]}")
 
                 # Delete option
@@ -725,7 +799,11 @@ We'll transform this into an engaging podcast.""",
             if "Upload Audio" in creation_method:
                 # Audio-based persona creation with session state
                 st.markdown("### 🎙️ Upload Audio Reference")
-                st.info("ℹ️ **Creating a Persona:** We'll analyze speaking STYLE (energy, pacing, tone) and map to our voice system. This is NOT voice cloning.")
+                import os as _persona_os
+                if _persona_os.getenv("ELEVENLABS_API_KEY"):
+                    st.info("🎤 **Creating a Persona with Voice Cloning:** Your voice will be cloned via ElevenLabs and saved as a reusable persona.")
+                else:
+                    st.info("ℹ️ **Creating a Persona:** We'll analyze speaking STYLE (energy, pacing, tone) and map to our voice system. Add `ELEVENLABS_API_KEY` to enable real voice cloning.")
 
                 # Initialize session state for persona creation
                 if 'persona_creation_step' not in st.session_state:
@@ -758,45 +836,37 @@ We'll transform this into an engaging podcast.""",
                                 with open(temp_audio, 'wb') as f:
                                     f.write(audio_file.getvalue())
 
-                                # Attempt voice cloning
+                                # Attempt voice cloning via ElevenLabs (if key available)
                                 voice_cloning_succeeded = False
                                 cloned_voice_path = None
+                                import os as _os2
 
-                                try:
-                                    with st.spinner("🎤 Attempting voice cloning..."):
-                                        from providers.coqui_provider import CoquiTTSProvider
-                                        coqui = CoquiTTSProvider()
+                                if _os2.getenv("ELEVENLABS_API_KEY"):
+                                    try:
+                                        with st.spinner("🎤 Preprocessing and cloning voice..."):
+                                            from providers.elevenlabs_provider import ElevenLabsTTSProvider
+                                            el = ElevenLabsTTSProvider()
+                                            try:
+                                                cleaned = _preprocess_audio_for_cloning(temp_audio)
+                                            except Exception:
+                                                cleaned = temp_audio
+                                            voice_id = el.clone_voice(
+                                                audio_path=cleaned,
+                                                name=f"Persona — {audio_file.name}",
+                                            )
+                                            if cleaned != temp_audio and cleaned.exists():
+                                                cleaned.unlink(missing_ok=True)
+                                            # Store the ElevenLabs voice_id as the "path" for downstream use
+                                            cloned_voice_path = voice_id
+                                            voice_cloning_succeeded = True
+                                            st.success("✅ Voice cloned via ElevenLabs!")
+                                    except Exception as clone_error:
+                                        st.warning(f"⚠️ Voice cloning failed: {str(clone_error)}")
+                                        st.info("📊 Falling back to style analysis...")
+                                else:
+                                    st.info("📊 No ElevenLabs key — analyzing speaking style instead.")
 
-                                        personas_dir = Path("personas")
-                                        personas_dir.mkdir(exist_ok=True)
-
-                                        cloned_voice_filename = f"cloned_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{audio_file.name}"
-                                        cloned_voice_path = personas_dir / cloned_voice_filename
-
-                                        import shutil
-                                        shutil.copy(temp_audio, cloned_voice_path)
-
-                                        test_audio = personas_dir / f"test_{cloned_voice_filename}"
-                                        coqui.set_speaker_voice(cloned_voice_path)
-                                        coqui.generate_audio(
-                                            text="This is a test of the voice cloning system.",
-                                            voice="cloned",
-                                            output_path=test_audio,
-                                            language="en"
-                                        )
-
-                                        voice_cloning_succeeded = True
-                                        st.success("✅ Voice cloning successful!")
-
-                                        if test_audio.exists():
-                                            test_audio.unlink()
-
-                                except Exception as clone_error:
-                                    st.warning(f"⚠️ Voice cloning failed: {str(clone_error)}")
-                                    st.info("📊 Falling back to style analysis...")
-                                    voice_cloning_succeeded = False
-
-                                # Analyze audio style (if cloning failed or as backup)
+                                # Style analysis (always run as backup/supplement)
                                 if not voice_cloning_succeeded:
                                     with st.spinner("🎯 Analyzing speaking style..."):
                                         from core.audio_style_analyzer import analyze_audio_for_persona
@@ -985,6 +1055,29 @@ We'll transform this into an engaging podcast.""",
                 elif persona is None and persona_key == "create_your_own":
                     st.error("Please complete the custom persona fields")
                 else:
+                    # Determine voice_id and persona for generation
+                    OPENAI_VOICES = {"alloy", "echo", "fable", "onyx", "nova", "shimmer"}
+                    cloned_voice_id = None
+
+                    if is_el_voice:
+                        # ElevenLabs account voice — extract voice_id and build a neutral persona
+                        cloned_voice_id = persona_key[4:]
+                        v_info = el_voice_lookup.get(cloned_voice_id, {})
+                        voice_name = v_info.get("name", cloned_voice_id)
+                        persona = create_custom_persona(
+                            name=voice_name,
+                            description=f"Podcast narrated by {voice_name}",
+                            energy="medium",
+                            humor="none",
+                            pacing="moderate",
+                            tone="neutral",
+                            provider_voice_map={provider_name: "nova"}
+                        )
+                    elif is_created_persona and selected_created_persona:
+                        v = selected_created_persona.preferred_tts_voice
+                        if v and v not in OPENAI_VOICES and v != "coqui_cloned":
+                            cloned_voice_id = v  # ElevenLabs voice_id
+
                     context = InputContext(
                         mode=GenerationMode.PERSONA,
                         main_topic=persona_topic,
@@ -992,7 +1085,8 @@ We'll transform this into an engaging podcast.""",
                         fun_vs_serious=fun_vs_serious,
                         tone=tone,
                         length=length,
-                        voice_provider=provider_name
+                        voice_provider=provider_name,
+                        preferred_voice=cloned_voice_id,
                     )
 
                     generate_podcast(context, llm_provider, tts_provider)
@@ -1229,12 +1323,224 @@ def _handle_persona_creation(audio_path: Path, original_filename: str, clone_voi
         return None
 
 
+def _preprocess_audio_for_cloning(input_path: Path) -> Path:
+    """
+    Clean up audio before sending to ElevenLabs to avoid detection rejections.
+    - Convert to mono WAV at 22050 Hz
+    - Normalize volume to -3 dBFS
+    - Strip metadata / unusual encodings
+    Returns path to cleaned WAV (temp file).
+    """
+    from pydub import AudioSegment
+    from pydub.effects import normalize
+    import tempfile
+
+    audio = AudioSegment.from_file(str(input_path))
+
+    # Convert to mono, resample to 22050 Hz (ElevenLabs prefers this)
+    audio = audio.set_channels(1).set_frame_rate(22050).set_sample_width(2)
+
+    # Normalize to -3 dBFS
+    audio = normalize(audio, headroom=3.0)
+
+    out_path = Path(tempfile.mktemp(suffix="_clean.wav"))
+    audio.export(str(out_path), format="wav")
+    return out_path
+
+
+@st.cache_data(ttl=60)
+def _check_elevenlabs_voice_status(voice_id: str) -> str:
+    """
+    Returns 'ready', 'blocked', or 'error'.
+    Cached for 60 seconds so selecting the persona doesn't hammer the API.
+    """
+    import os
+    from dotenv import load_dotenv
+    load_dotenv()
+    api_key = os.getenv("ELEVENLABS_API_KEY")
+    if not api_key:
+        return "error"
+    try:
+        import tempfile
+        from pathlib import Path as _Path
+        from elevenlabs.client import ElevenLabs
+        client = ElevenLabs(api_key=api_key)
+        audio = client.text_to_speech.convert(
+            voice_id=voice_id,
+            text="test",
+            model_id="eleven_multilingual_v2",
+            output_format="mp3_44100_128",
+        )
+        out = _Path(tempfile.mktemp(suffix=".mp3"))
+        with open(out, "wb") as f:
+            for chunk in audio:
+                if chunk:
+                    f.write(chunk)
+        out.unlink(missing_ok=True)
+        return "ready"
+    except Exception as e:
+        if "voice_access_denied" in str(e) or "authorization_error" in str(e):
+            return "blocked"
+        return "error"
+
+
+def _fetch_elevenlabs_voices():
+    """Fetch all voices from ElevenLabs account via REST API. Returns (list, error_str_or_None)."""
+    import os as _os
+    import requests as _requests
+    from dotenv import load_dotenv
+    load_dotenv()
+    api_key = _os.getenv("ELEVENLABS_API_KEY")
+    if not api_key:
+        return [], "ELEVENLABS_API_KEY not set"
+    try:
+        resp = _requests.get(
+            "https://api.elevenlabs.io/v1/voices",
+            headers={"xi-api-key": api_key},
+            timeout=10,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        voices = data.get("voices", [])
+        return [
+            {
+                "id": v["voice_id"],
+                "name": v["name"],
+                "category": v.get("category", "premade") or "premade",
+                "description": v.get("description", "") or "",
+            }
+            for v in voices
+        ], None
+    except Exception as _e:
+        return [], str(_e)
+
+
+def _clone_voice_elevenlabs(audio_path: Path, original_filename: str, current_tts_provider):
+    """
+    Clone voice via ElevenLabs, save as a CreatedPersona, and return
+    (voice_id, tts_provider_to_use).
+
+    If the ElevenLabs key has TTS permission → returns (voice_id, ElevenLabsTTSProvider).
+    If only clone permission (no TTS) → saves persona but returns (None, current_tts_provider)
+    so caller can fall back to style-matched OpenAI voice.
+    """
+    from providers.elevenlabs_provider import ElevenLabsTTSProvider
+    from core.created_personas import CreatedPersona, save_created_persona
+    import uuid
+    from datetime import datetime
+    import tempfile
+
+    try:
+        el_provider = ElevenLabsTTSProvider()
+
+        # Preprocess audio to maximise ElevenLabs acceptance rate
+        try:
+            cleaned_path = _preprocess_audio_for_cloning(audio_path)
+            clone_source = cleaned_path
+            print(f"[INFO] Audio preprocessed for cloning: {cleaned_path}")
+        except Exception as prep_err:
+            print(f"[WARNING] Audio preprocessing failed ({prep_err}), using original.")
+            clone_source = audio_path
+            cleaned_path = None
+
+        persona_name = f"Cloned — {original_filename}"
+        voice_id = el_provider.clone_voice(
+            audio_path=clone_source,
+            name=persona_name,
+            description=f"Voice cloned from uploaded file: {original_filename}",
+        )
+
+        if cleaned_path and cleaned_path.exists():
+            cleaned_path.unlink(missing_ok=True)
+
+        # Test that TTS actually works with this key before committing to ElevenLabs TTS
+        tts_works = False
+        try:
+            test_out = Path(tempfile.mktemp(suffix=".mp3"))
+            el_provider.generate_audio("test", voice_id, test_out)
+            if test_out.exists():
+                test_out.unlink()
+            tts_works = True
+        except Exception as tts_err:
+            print(f"[WARNING] ElevenLabs TTS permission check failed: {tts_err}")
+
+        # Save as a CreatedPersona so it appears in Persona Mode
+        now = datetime.now().isoformat()
+        persona = CreatedPersona(
+            persona_id=f"cloned_{uuid.uuid4().hex[:8]}",
+            persona_name=persona_name,
+            persona_description=f"ElevenLabs voice clone from {original_filename}",
+            reference_audio_filename=original_filename,
+            voice_archetype="cloned_voice",
+            preferred_tts_voice=voice_id,
+            energy="medium",
+            pacing="moderate",
+            humor_level="subtle",
+            tone="warm",
+            intensity="moderate",
+            conversational_style="conversational",
+            style_notes=f"Voice cloned via ElevenLabs from {original_filename}",
+            system_prompt_guidance="Speak in a natural, engaging conversational tone.",
+            created_by_user="default",
+            created_at=now,
+            last_modified=now,
+        )
+        save_created_persona(persona)
+
+        if tts_works:
+            return voice_id, el_provider
+        else:
+            # Clone saved but TTS blocked — signal caller with a special sentinel
+            return f"__no_tts__{voice_id}", current_tts_provider
+
+    except Exception as e:
+        print(f"[ERROR] ElevenLabs voice cloning failed: {e}")
+        return None, current_tts_provider
+
+
+def _match_style_to_tts_voice(style: dict, available_voices: list) -> str:
+    """
+    Map analyzed audio style traits to the closest available TTS voice.
+
+    OpenAI voice personality guide:
+      alloy   - balanced, neutral, versatile
+      echo    - clear, deliberate, moderate energy
+      fable   - expressive, warm, storytelling
+      onyx    - deep, authoritative, calm/professional
+      nova    - warm, friendly, moderate energy (good default)
+      shimmer - soft, gentle, low energy
+    """
+    energy = style.get("energy", "medium")
+    pacing = style.get("pacing", "moderate")
+    humor = style.get("humor", "subtle")
+    tone_trait = style.get("tone", "warm")
+
+    # Priority rules (most specific first)
+    if energy in ("high", "extreme") and humor in ("moderate", "high"):
+        candidate = "fable"
+    elif energy in ("high", "extreme") and pacing in ("fast", "rapid"):
+        candidate = "alloy"
+    elif energy in ("low",) or pacing in ("slow",):
+        candidate = "shimmer"
+    elif tone_trait in ("cool", "sharp") or energy == "low":
+        candidate = "onyx"
+    elif tone_trait == "warm" and humor in ("none", "subtle"):
+        candidate = "nova"
+    else:
+        candidate = "echo"
+
+    # Fall back to first available if candidate not in provider's list
+    return candidate if candidate in available_voices else (available_voices[0] if available_voices else "nova")
+
+
 def generate_podcast(context: InputContext, llm_provider, tts_provider):
     """Generate podcast using unified pipeline"""
     output_root = Path(config.OUTPUT_ROOT)
 
     with st.spinner(f"🎬 Generating {context.mode.value} podcast..."):
         try:
+            st.caption(f"Debug — mode: {context.mode.value} | persona: {getattr(context.persona, 'name', None)} | preferred_voice: {str(context.preferred_voice)[:20] if context.preferred_voice else None}")
+
             # Create pipeline
             pipeline = UnifiedGenerationPipeline(llm_provider, tts_provider)
 
@@ -1243,6 +1549,24 @@ def generate_podcast(context: InputContext, llm_provider, tts_provider):
 
             # Display success
             st.success("✅ Podcast generated successfully!")
+
+            # Voice status — shown prominently before anything else
+            _actual_voice = result.metadata.get("actual_voice_used", "")
+            _fallback_reason = result.metadata.get("voice_fallback_reason", "")
+            if _fallback_reason:
+                st.warning(
+                    f"**Voice fallback triggered** — ElevenLabs rejected the voice. Audio used OpenAI **nova** instead.\n\n"
+                    f"**Reason:** `{_fallback_reason}`"
+                )
+            elif _actual_voice:
+                if "fallback" in _actual_voice:
+                    st.warning(f"Voice fallback: {_actual_voice}")
+                else:
+                    st.success(f"**Voice applied:** `{_actual_voice}`")
+
+            # Audio player — right after voice status
+            st.subheader("🎧 Audio")
+            st.audio(result.audio_path)
 
             # Display outputs
             col1, col2 = st.columns(2)
@@ -1254,10 +1578,6 @@ def generate_podcast(context: InputContext, llm_provider, tts_provider):
             with col2:
                 st.subheader("📋 Show Notes")
                 st.text_area("", result.show_notes, height=300, key=f"notes_{result.episode_id}")
-
-            # Audio player
-            st.subheader("🎧 Audio")
-            st.audio(result.audio_path)
 
             # Episode info
             with st.expander("ℹ️ Episode Details"):

@@ -146,6 +146,7 @@ class InputContext:
     tone: str = "professional"  # casual, professional, educational
     length: str = "medium"  # short, medium, long
     voice_provider: str = "openai"  # openai, gemini
+    preferred_voice: Optional[str] = None  # Override TTS voice (e.g. matched from uploaded audio)
 
     # Additional metadata
     metadata: Dict = field(default_factory=dict)

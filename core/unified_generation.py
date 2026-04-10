@@ -6,7 +6,7 @@ Single entry point for all podcast generation modes with consistent processing.
 
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Tuple
 import re
 
 from core.input_models import InputContext, GenerationMode, EpisodeResult, Character
@@ -76,13 +76,16 @@ class UnifiedGenerationPipeline:
         save_text_file(show_notes, show_notes_file)
 
         # Generate audio with voice assignment
-        audio_path, voice_assignments = self._generate_audio(script, context, episode_dir)
+        audio_path, voice_assignments, actual_voice_used, fallback_reason = self._generate_audio(script, context, episode_dir)
 
         # Build metadata
         metadata = self._build_metadata(
             context, episode_id, episode_dir, script_file,
             show_notes_file, audio_path, voice_assignments
         )
+        metadata["actual_voice_used"] = actual_voice_used
+        if fallback_reason:
+            metadata["voice_fallback_reason"] = fallback_reason
 
         # Save metadata
         save_episode_metadata(episode_dir, metadata)
@@ -363,7 +366,7 @@ Generate the show notes:"""
 
         return self.llm.generate_text(prompt)
 
-    def _generate_audio(self, script: str, context: InputContext, episode_dir: Path) -> tuple[Path, Optional[Dict[str, str]]]:
+    def _generate_audio(self, script: str, context: InputContext, episode_dir: Path) -> "Tuple[Path, Optional[Dict[str, str]]]":
         """
         Generate audio with appropriate voice assignment
 
@@ -402,8 +405,11 @@ Generate the show notes:"""
                 voice_info_content += f"{char.name}: {char.preferred_voice}\n"
             save_text_file(voice_info_content, voice_info_file)
         elif context.mode == GenerationMode.PERSONA and context.persona:
-            # Get persona's recommended voice
-            voice = context.persona.get_voice_for_provider(context.voice_provider)
+            # preferred_voice takes priority (e.g. ElevenLabs voice_id from cloned persona)
+            if context.preferred_voice:
+                voice = context.preferred_voice
+            else:
+                voice = context.persona.get_voice_for_provider(context.voice_provider)
             voice_assignments = {context.persona.name: voice}
 
             # Save persona profile
@@ -412,70 +418,85 @@ Generate the show notes:"""
             with open(persona_file, 'w') as f:
                 json.dump(context.persona.to_dict(), f, indent=2)
         else:
-            # Use default voice selection from sidebar/config
+            # Use preferred_voice if set (cloned voice_id or style-matched voice)
             available_voices = self.tts.available_voices
-            voice = available_voices[0] if available_voices else "nova"
+            if context.preferred_voice:
+                voice = context.preferred_voice
+                print(f"[INFO] Using preferred voice: {voice}")
+            else:
+                voice = available_voices[0] if available_voices else "nova"
             voice_assignments = None
 
-        # Generate audio - use voice cloning if available
-        audio_file = episode_dir / f"podcast_{voice}.mp3"
+        # Resolve the active TTS provider.
+        # If the voice is not in this provider's list it's an ElevenLabs voice_id — switch providers.
+        import os as _os
+        from dotenv import load_dotenv as _load_dotenv
+        _load_dotenv()
+        active_tts = self.tts
+        actual_voice_used = voice
+        fallback_reason = None
 
-        if is_voice_cloned and cloned_voice_path:
-            # Use Coqui voice cloning
-            try:
-                from providers.coqui_provider import CoquiTTSProvider
-                coqui = CoquiTTSProvider()
+        print(f"[DEBUG] voice='{voice}' | ELEVENLABS_API_KEY set={bool(_os.getenv('ELEVENLABS_API_KEY'))} | available_voices={active_tts.available_voices[:3]}")
 
-                # Set the speaker voice for cloning
-                coqui.set_speaker_voice(Path(cloned_voice_path))
+        if voice not in active_tts.available_voices:
+            el_key = _os.getenv("ELEVENLABS_API_KEY")
+            if el_key:
+                try:
+                    from providers.elevenlabs_provider import ElevenLabsTTSProvider
+                    active_tts = ElevenLabsTTSProvider(api_key=el_key)
+                    print(f"[INFO] Switched to ElevenLabs provider for voice '{voice[:16]}...'")
+                except Exception as el_init_err:
+                    import traceback
+                    err_detail = f"ElevenLabs init failed: {el_init_err}\n{traceback.format_exc()}"
+                    print(f"[ERROR] {err_detail}")
+                    fallback_reason = err_detail
+                    voice = "nova"
+                    actual_voice_used = "nova (fallback)"
+                    active_tts = self.tts
+            else:
+                fallback_reason = f"No ELEVENLABS_API_KEY found — voice '{voice[:16]}' cannot be used"
+                print(f"[WARNING] {fallback_reason}")
+                voice = active_tts.available_voices[0] if active_tts.available_voices else "nova"
+                actual_voice_used = f"{voice} (fallback)"
 
-                # For long scripts, chunk them
-                MAX_TTS_LENGTH = 4096
-                if len(script) <= MAX_TTS_LENGTH:
-                    coqui.generate_audio(
-                        text=script,
-                        voice="cloned",  # Ignored by Coqui, uses speaker_wav
-                        output_path=audio_file,
-                        language="en"
-                    )
-                else:
-                    # Chunk and merge
-                    from core.content_generation import split_script_into_chunks
-                    import tempfile
-                    import shutil
+        # Safe filename: strip characters that aren't alphanumeric/underscore
+        import re as _re
+        safe_voice = _re.sub(r"[^a-zA-Z0-9_]", "", voice)[:24] or "podcast"
+        audio_file = episode_dir / f"podcast_{safe_voice}.mp3"
 
-                    chunks = split_script_into_chunks(script, chunk_size=4000)
-                    temp_dir = Path(tempfile.mkdtemp(prefix="podcast_chunks_"))
+        # Generate with fallback: if provider rejects the voice, fall back to OpenAI nova
+        _FALLBACK_ERRORS = [
+            "voice_access_denied", "missing_permissions", "authorization_error",
+            "Invalid voice", "detected_captcha_voice", "voice_not_found",
+            "quota_exceeded", "max_character_count_exceeded",
+        ]
 
-                    try:
-                        chunk_files = []
-                        for i, chunk_text in enumerate(chunks, 1):
-                            print(f"[INFO] Generating cloned voice chunk {i}/{len(chunks)}...")
-                            chunk_file = temp_dir / f"chunk_{i:03d}.mp3"
-                            coqui.generate_audio(
-                                text=chunk_text,
-                                voice="cloned",  # Ignored by Coqui, uses speaker_wav
-                                output_path=chunk_file,
-                                language="en"
-                            )
-                            chunk_files.append(chunk_file)
+        def _openai_fallback(path, reason=""):
+            nonlocal actual_voice_used, fallback_reason
+            from providers.openai_provider import OpenAITTSProvider
+            if path.exists():
+                path.unlink()
+            generate_audio(OpenAITTSProvider(), script, "nova", path)
+            actual_voice_used = "nova (fallback)"
+            fallback_reason = reason
+            print(f"[OK] Fallback audio generated with OpenAI nova. Reason: {reason}")
 
-                        # Merge chunks
-                        from core.content_generation import _merge_audio_files
-                        _merge_audio_files(chunk_files, audio_file)
-                    finally:
-                        shutil.rmtree(temp_dir, ignore_errors=True)
+        try:
+            generate_audio(active_tts, script, voice, audio_file)
+        except Exception as tts_err:
+            err_str = str(tts_err)
+            if any(x in err_str for x in _FALLBACK_ERRORS):
+                print(f"[WARNING] TTS failed: {err_str[:120]}. Falling back.")
+                _openai_fallback(audio_file, reason=err_str[:120])
+            else:
+                raise
 
-                print(f"[OK] Generated voice-cloned audio: {audio_file}")
-            except Exception as e:
-                print(f"[WARNING] Voice cloning failed: {e}")
-                print("[INFO] Falling back to standard TTS...")
-                generate_audio(self.tts, script, voice, audio_file)
-        else:
-            # Standard TTS generation
-            generate_audio(self.tts, script, voice, audio_file)
+        # If file is missing or empty (ElevenLabs wrote 0 bytes before erroring)
+        if not audio_file.exists() or audio_file.stat().st_size < 1000:
+            print("[WARNING] Audio file empty/missing. Falling back to OpenAI nova.")
+            _openai_fallback(audio_file, reason="empty/missing audio file from ElevenLabs")
 
-        return audio_file, voice_assignments
+        return audio_file, voice_assignments, actual_voice_used, fallback_reason
 
     def _build_metadata(
         self,
