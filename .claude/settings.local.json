@@ -51,7 +51,8 @@
       "Bash(rm -f c:/Users/alexg/podcast_creator_agent/core/__pycache__/*.pyc)",
       "Bash(c:/Users/alexg/podcast_creator_agent/.venv/Scripts/python.exe -c \"import sys; print\\(sys.executable\\)\")",
       "Bash(c:/Users/alexg/podcast_creator_agent/.venv/Scripts/python.exe -m streamlit --version)",
-      "Bash(c:/Users/alexg/podcast_creator_agent/.venv/Scripts/python.exe -m pip install streamlit)"
+      "Bash(c:/Users/alexg/podcast_creator_agent/.venv/Scripts/python.exe -m pip install streamlit)",
+      "Bash(.venv/Scripts/python.exe -c \"import elevenlabs; print\\(elevenlabs.__version__\\); from elevenlabs.client import ElevenLabs; print\\('ElevenLabs import OK'\\)\")"
     ]
   }
 }

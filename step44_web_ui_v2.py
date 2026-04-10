@@ -55,6 +55,10 @@ def main():
     st.title("🎙️ AI Podcast Creator v2")
     st.markdown("**5 Generation Modes** | Unified Source Material Hub | Professional AI-powered podcast production")
 
+    # Show Python environment info in sidebar expander for debugging
+    import sys as _sys
+    _python_exe = _sys.executable
+
     # Fetch ElevenLabs voices once per session and cache in session_state
     if "el_voices_loaded" not in st.session_state:
         _vlist, _verr = _fetch_elevenlabs_voices()
@@ -67,6 +71,13 @@ def main():
     # Sidebar - Global Configuration
     with st.sidebar:
         st.header("⚙️ Global Settings")
+        with st.expander("🐍 Python Environment", expanded=False):
+            st.code(_python_exe, language=None)
+            try:
+                import elevenlabs as _el_mod
+                st.success(f"elevenlabs {_el_mod.__version__} ✓")
+            except ImportError:
+                st.error("elevenlabs NOT installed in this Python")
 
         # Provider selection
         available_providers = detect_available_providers()

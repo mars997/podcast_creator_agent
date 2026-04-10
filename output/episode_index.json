@@ -786,5 +786,17 @@
     "metadata_file": "output\\Source_Material_2026-04-09_193956\\metadata.json",
     "script_file": "output\\Source_Material_2026-04-09_193956\\script.txt",
     "show_notes_file": "output\\Source_Material_2026-04-09_193956\\show_notes.txt"
+  },
+  {
+    "created_at": "2026-04-10T08:54:47.745286",
+    "episode_id": "Source_Material_2026-04-10_085413",
+    "topic": "Source Material",
+    "tone": "casual",
+    "voice": null,
+    "length": "short",
+    "episode_dir": "output\\Source_Material_2026-04-10_085413",
+    "metadata_file": "output\\Source_Material_2026-04-10_085413\\metadata.json",
+    "script_file": "output\\Source_Material_2026-04-10_085413\\script.txt",
+    "show_notes_file": "output\\Source_Material_2026-04-10_085413\\show_notes.txt"
   }
 ]
